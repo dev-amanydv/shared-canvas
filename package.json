@@ -1,5 +1,5 @@
 {
-  "name": "excalidraw",
+  "name": "shared-canvas",
   "private": true,
   "scripts": {
     "build": "turbo run build",

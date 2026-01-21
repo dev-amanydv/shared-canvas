@@ -1,6 +1,8 @@
 import express, { Express } from "express";
 import jwt from "jsonwebtoken";
 import { authMiddleware } from "./middlewares/auth.middleware";
+import { JWT_SECRET } from "@repo/backend-common/config";
+import { CreateUserSchema, SigninSchema, CreateRoomSchema } from "@repo/common/types";
 
 const app: Express = express();
 
@@ -12,13 +14,13 @@ app.get('/', (req, res) => {
 
 app.post('/signup', (req, res) => {
     try {
-        const { username, password } = req.body;
-
-        if (!username || !password){
-            throw new Error("Username and password are required");
+        const data = CreateUserSchema.safeParse(req.body);
+        if (!data.success){
+            console.error("Invalid inputs");
+            return;
         }
         //db call
-        const token = jwt.sign({username: username}, 'secret');
+        const token = jwt.sign({username: data.username}, JWT_SECRET);
 
         res.json({
             msg: "Account created successfully",
@@ -34,14 +36,14 @@ app.post('/signup', (req, res) => {
 
 app.post('/signin', (req, res) => {
     try {
-        const { username, password } = req.body;
-
-        if (!username || !password){
-            throw new Error("Username and password are required");
+        const data = SigninSchema.safeParse(req.body);
+        if (!data.success){
+            console.error("Invalid inputs");
+            return;
         }
         //db call
 
-        const token = jwt.sign({username: username}, 'secret');
+        const token = jwt.sign({username: data.username}, JWT_SECRET);
 
         res.json({
             msg: "Account logged in successfully",
@@ -56,6 +58,13 @@ app.post('/signin', (req, res) => {
 })
 
 app.post('/create-room', authMiddleware,  (req, res) => {
+
+    const data = CreateRoomSchema.safeParse(req.body);
+    if (!data.success){
+        console.error("Invalid inputs");
+        return;
+    }
+
     
 })
 
