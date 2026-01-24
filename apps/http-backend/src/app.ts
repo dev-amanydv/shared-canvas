@@ -20,7 +20,7 @@ app.post('/signup', (req, res) => {
             return;
         }
         //db call
-        const token = jwt.sign({username: data.username}, JWT_SECRET);
+        const token = jwt.sign({username: data}, JWT_SECRET);
 
         res.json({
             msg: "Account created successfully",
@@ -41,9 +41,8 @@ app.post('/signin', (req, res) => {
             console.error("Invalid inputs");
             return;
         }
-        //db call
 
-        const token = jwt.sign({username: data.username}, JWT_SECRET);
+        const token = jwt.sign({username: data}, JWT_SECRET);
 
         res.json({
             msg: "Account logged in successfully",
