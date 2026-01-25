@@ -17,8 +17,8 @@ model User {
   id        String        @unique @default(uuid())
   name      String        
   password  String
-  email     String
-  avatar    String
+  email     String        @unique
+  avatar    String?
   rooms     Room[]
   chats     Chat[]
 }
