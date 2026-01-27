@@ -1,0 +1,31 @@
+import { CreateRoomSchema } from "@repo/common/types"
+import { BadRequestError } from "../middlewares/errors/errorTypes.js";
+import { prismaClient } from "@repo/db/client";
+import { Request, Response } from "express";
+
+export const handleCreateRoom = async (req: Request, res: Response) => {
+    const parsedData = CreateRoomSchema.safeParse(req.body);
+    if (!parsedData.success){
+        throw new BadRequestError('Invalid body type')
+    }
+
+    const userId = req.userId || "";
+
+    const room = await prismaClient.room.create({
+        data: {
+            slug: parsedData.data.slug,
+            name: parsedData.data.slug,
+            adminId: userId
+        }
+    });
+
+    res.status(203).json({
+        msg: "Room created successfully!",
+        data: {
+            room: {
+                slug: room.slug,
+                name: room.name,
+            }
+        }
+    })
+}
