@@ -8,8 +8,9 @@ import { prismaClient } from "@repo/db/client";
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from "@repo/backend-common/config";
 import bcrypt from "bcrypt";
+import AsyncHandler from "../utils/AsyncHandler.js";
 
-export const handleSignup = async (req: Request, res: Response) => {
+export const handleSignup = AsyncHandler(async (req: Request, res: Response) => {
   const parsedData = CreateUserSchema.safeParse(req.body);
   if (!parsedData.success) {
     throw new BadRequestError("Invalid body type");
@@ -65,9 +66,10 @@ export const handleSignup = async (req: Request, res: Response) => {
       user: newUser,
     },
   });
-};
+}
+)
 
-export const handleLogin = async (req: Request, res: Response) => {
+export const handleLogin = AsyncHandler(async (req: Request, res: Response) => {
   const parsedData = SigninSchema.safeParse(req.body);
   if (!parsedData.success){
     throw new BadRequestError("Invalid body type")
@@ -97,7 +99,7 @@ export const handleLogin = async (req: Request, res: Response) => {
   res.cookie("token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: "strict",
+    sameSite: "none",
     path: '/',
     maxAge: 14 * 24 * 60 * 60 * 1000
   });
@@ -114,3 +116,4 @@ export const handleLogin = async (req: Request, res: Response) => {
     }
   })
 }
+)

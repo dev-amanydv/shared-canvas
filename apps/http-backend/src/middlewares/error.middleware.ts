@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "./errors/AppError.js";
-import { ValidationError } from "./errors/errorTypes.js";
 
 export const errorHandler = (
     err: Error,
@@ -9,6 +8,13 @@ export const errorHandler = (
     next: NextFunction
 ): void => {
     let error: AppError = err as AppError;
+
+    if (err.name === "JsonWebToken"){
+        error = new AppError('Invalid token', 401, true)
+    }
+    if (err.name === "TokenExpiredError"){
+        error = new AppError('Invalid expired', 401, true)
+    }
 
     const statusCode = error.statusCode || 500;
     const isOperational = error.isOperational || false;
