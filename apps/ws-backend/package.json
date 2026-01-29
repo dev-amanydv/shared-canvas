@@ -5,20 +5,21 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "npm run build && npm run start",
+    "dev": "tsx watch ./src/index.ts",
     "build": "tsc -b",
     "start": "node ./dist/index.js"
   },
   "dependencies": {
     "@types/jsonwebtoken": "^9.0.10",
     "jsonwebtoken": "^9.0.3",
+    "tsx": "^4.21.0",
     "ws": "^8.19.0"
   },
   "devDependencies": {
-    "@repo/typescript-config": "workspace:*",
-    "@types/ws": "^8.18.1",
     "@repo/backend-common": "workspace:*",
-    "@repo/common": "workspace:*"
+    "@repo/common": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/ws": "^8.18.1"
   },
   "keywords": [],
   "author": "",

@@ -1,36 +1,98 @@
 import { WebSocketServer } from "ws";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { JWT_SECRET } from "@repo/backend-common/config";
+import WebSocket from "ws";
 
-const wss = new WebSocketServer({ port: 9000});
+const wss = new WebSocketServer({ port: 9000 });
 
 interface AuthJwtPayload extends JwtPayload {
-    userId?: string
+  userId?: string;
 }
 
-wss.on('connection', (ws, request) => {
-    console.log("new client connected");
+interface Users {
+  userId: string;
+  rooms: number[];
+  ws: WebSocket;
+}
 
-    const url = request.url;
-    if (!url) return;
+let users: Users[] = [];
 
-    const queryParams = new URLSearchParams(url?.split('?')[1]);
-    const token = queryParams.get('token') ?? "";
-
+function authenticateUser(token: string) {
+  try {
     const decoded = jwt.verify(token, JWT_SECRET) as AuthJwtPayload;
-    if (!decoded || !decoded.userId) {
-        ws.close();
-        return;
+    if (!decoded || !decoded.id) {
+      return false;
+    }
+    return decoded.id;
+  } catch (error) {
+    console.error("Error authenticateUser: ", error);
+    return false;
+  }
+}
+
+wss.on("connection", (ws, request) => {
+  console.log("new client connected");
+
+  const url = request.url;
+  if (!url) return;
+
+  const queryParams = new URLSearchParams(url?.split("?")[1]);
+  const token = queryParams.get("token") ?? "";
+  const userId = authenticateUser(token);
+  if (!userId) {
+    ws.close();
+    return;
+  }
+
+  users.push({
+    userId: userId,
+    rooms: [],
+    ws,
+  });
+
+  ws.on("message", function message(data) {
+    const parsedData = JSON.parse(data as unknown as string);
+
+    if (parsedData.type === "join-room") {
+      console.log({ users });
+      const user = users.find((x) => x.ws === ws);
+      console.log({ user });
+      user?.rooms.push(parsedData.roomId);
+      console.log({ user });
+      user?.ws.send(`Room: ${parsedData.roomId} joined successfully!!`);
     }
 
-    ws.on('message', function message (data){
-        ws.send("server received your message");
-    })
+    if (parsedData.type === "leave-room") {
+      const user = users.find((x) => x.ws === ws);
+      if (!user) {
+        return;
+      }
+      console.log({ user });
+      user.rooms = user?.rooms.filter((x) => x !== parsedData.roomId);
+      user.ws.send(`Room: ${parsedData.roomId} leaved successfully`)
+    }
 
-    ws.on('close', () => {
-        console.log("Server closed")
-    });
+    if (parsedData.type === "chat") {
+      const roomId = parsedData.roomId;
+      const message = parsedData.message;
 
-    ws.send('Welcome to websocket server')
-})
+      users.forEach((user) => {
+        if (user.rooms.includes(roomId)) {
+          user.ws.send(
+            JSON.stringify({
+              type: "chat",
+              message: message,
+              roomId,
+            }),
+          );
+        }
+      });
+    }
+  });
 
+  ws.on("close", () => {
+    console.log("Server closed");
+  });
+
+  ws.send("Welcome to websocket server");
+});
