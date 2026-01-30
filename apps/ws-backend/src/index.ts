@@ -61,7 +61,9 @@ wss.on("connection", (ws, request) => {
       console.log("join-room:before: ", user);
       user?.rooms.push(parsedData.roomId);
       console.log("join-room:after: ", user);
-      user?.ws.send(`Room: ${parsedData.roomId} joined successfully!!`);
+      user?.ws.send(JSON.stringify({
+        msg: `Room: ${parsedData.roomId} joined!`
+      }));
     }
 
     if (parsedData.type === "leave-room") {
@@ -109,5 +111,4 @@ wss.on("connection", (ws, request) => {
     console.log("Server closed");
   });
 
-  ws.send("Welcome to websocket server");
 });

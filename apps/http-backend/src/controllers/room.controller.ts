@@ -1,5 +1,5 @@
 import { CreateRoomSchema } from "@repo/common/types"
-import { BadRequestError, ConflictError } from "../middlewares/errors/errorTypes.js";
+import { BadRequestError, ConflictError, NotFoundError } from "../middlewares/errors/errorTypes.js";
 import { prismaClient } from "@repo/db/client";
 import { Request, Response } from "express";
 import AsyncHandler from "../utils/AsyncHandler.js";
@@ -37,6 +37,25 @@ export const handleCreateRoom = AsyncHandler(async (req: Request, res: Response)
                 slug: room.slug,
                 name: room.name,
             }
+        }
+    })
+})
+
+export const getRoomId = AsyncHandler(async (req, res) => {
+    const slug = req.params.slug as string;
+
+    const room = await prismaClient.room.findUnique({
+        where: {
+            slug
+        }
+    });
+    if (!room){
+        throw new NotFoundError('Room does not exist')
+    }
+    res.status(200).json({
+        msg: "Fetched roomId successfully",
+        data: {
+            roomId: room?.id
         }
     })
 })
