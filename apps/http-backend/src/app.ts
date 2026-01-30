@@ -1,6 +1,7 @@
 import express, { Express } from "express";
 import authRouter from "./routes/auth.route.js";
 import roomRouter from "./routes/room.route.js";
+import chatRouter from "./routes/chat.route.js";
 import cookieParser from "cookie-parser";
 import { errorHandler } from "./middlewares/error.middleware.js";
 
@@ -17,6 +18,7 @@ app.get("/", (req, res) => {
 
 app.use("/auth", authRouter);
 app.use("/room", roomRouter);
+app.use("/chat", chatRouter);
 
 app.use(errorHandler);
 
