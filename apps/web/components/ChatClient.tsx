@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { useSocket } from "../hooks/useSocket";
 import { chat } from "../types/types";
-import { parse } from "path";
 
 export default function ChatClient({
   chats,
@@ -12,6 +11,7 @@ export default function ChatClient({
   roomId: number;
 }) {
   const [messages, setMessages] = useState<chat[]>(chats);
+  const [currentMessage, setCurrentMessage] = useState("");
   const { socket, loading } = useSocket();
 
   useEffect(() => {
@@ -26,7 +26,15 @@ export default function ChatClient({
       socket.onmessage = (event) => {
         const parsedData = JSON.parse(event.data);
         if (parsedData.type === "chat") {
-          setMessages((c) => [...c, {id: 0, message: parsedData.message, userId: "0", roomId: parsedData.roomId}]);
+          setMessages((c) => [
+            ...c,
+            {
+              id: parsedData.id,
+              message: parsedData.message,
+              userId: parsedData.userId,
+              roomId: parsedData.roomId,
+            },
+          ]);
         }
       };
     }
@@ -34,5 +42,31 @@ export default function ChatClient({
       socket?.close();
     };
   }, [socket, loading]);
-  return <div>{messages.map((m) => m.message)}</div>;
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        width: "100vw",
+        height: "100vh",
+      }}
+    >
+      {messages.map((m) => (
+        <div key={m.id}>{m.message}</div>
+      ))}
+      <div>
+        <input type="text" value={currentMessage} onChange={(e) => {
+          setCurrentMessage(e.target.value)
+        }} placeholder="message"  />
+        <button onClick={() => {
+          socket?.send(JSON.stringify({
+            type: "chat",
+            roomId: roomId,
+            message: currentMessage
+          }));
+          setCurrentMessage("")
+        }}>Send</button>
+      </div>
+    </div>
+  );
 }
