@@ -18,7 +18,7 @@ export const Input = ({
   return (
     <input
       placeholder={placeholder}
-      className={`px-3 py-1 
+      className={`px-3 py-1
                 border border-gray-300 dark:border-[#383838]
                 w-full
                 rounded-xl
