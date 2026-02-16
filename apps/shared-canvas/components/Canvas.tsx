@@ -1,6 +1,7 @@
 "use client"
 import { initDraw } from "@/draw"
 import { useEffect, useRef } from "react"
+import Nav from "./Nav"
 
 export default function Canvas ({ roomId, socket }: {
     roomId: string,
@@ -17,6 +18,9 @@ export default function Canvas ({ roomId, socket }: {
 
     return (
         <div className="w-full h-full">
+            <div className="flex justify-center w-full">
+                <Nav />
+            </div>
             <canvas width={2000} height={1000} ref={canvasRef} ></canvas>
         </div>
     )

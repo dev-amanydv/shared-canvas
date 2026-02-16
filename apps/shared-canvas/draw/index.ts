@@ -35,7 +35,7 @@ export const initDraw = async (
     if (message.type === "chat") {
       const parsedShape = JSON.parse(message.message);
       existingShapes.push(parsedShape);
-      console.log("Existing shapes: ", existingShapes)
+      console.log("Existing shapes: ", existingShapes);
       clearCanvas(ctx, canvas, existingShapes);
     }
   };
@@ -63,11 +63,13 @@ export const initDraw = async (
         width: width,
       };
       existingShapes.push(shape);
-      socket.send(JSON.stringify({
-        type: "chat",
-        message: JSON.stringify(shape),
-        roomId
-      }));
+      socket.send(
+        JSON.stringify({
+          type: "chat",
+          message: JSON.stringify(shape),
+          roomId,
+        }),
+      );
     } else if (selectedShape === "circle") {
       const radius = Math.hypot(e.clientX - startX, e.clientY - startY);
       existingShapes.push({
@@ -87,14 +89,12 @@ export const initDraw = async (
   });
   canvas.addEventListener("mousemove", (e) => {
     if (clicked) {
-      ctx.strokeStyle = "white";
+      ctx.strokeStyle = "black";
       clearCanvas(ctx, canvas, existingShapes);
 
       if (selectedShape === "rectangle") {
         const height = e.clientY - startY;
         const width = e.clientX - startX;
-        console.log("Height: ", height);
-        console.log("Width: ", width);
         ctx.strokeRect(startX, startY, width, height);
       } else if (selectedShape === "circle") {
         const radius = Math.hypot(e.clientX - startX, e.clientY - startY);
@@ -114,7 +114,7 @@ function clearCanvas(
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   existingShapes.map((shape) => {
     if (shape.shape === "rectangle") {
-      ctx.strokeStyle = "white"
+      ctx.strokeStyle = "black";
       ctx.strokeRect(shape.startX, shape.startY, shape.width, shape.height);
     } else if (shape.shape === "circle") {
       ctx.beginPath();
@@ -138,6 +138,6 @@ async function getExistingShapes(roomId: string) {
     const messageData = JSON.parse(x.message);
     return messageData;
   });
-  console.log("shapes: ", shapes)
+  console.log("shapes: ", shapes);
   return shapes;
 }
