@@ -58,9 +58,7 @@ wss.on("connection", (ws, request) => {
     if (parsedData.type === "join-room") {
       console.log({ users });
       const user = users.find((x) => x.ws === ws);
-      console.log("join-room:before: ", user);
       user?.rooms.push(parsedData.roomId);
-      console.log("join-room:after: ", user);
       user?.ws.send(
         JSON.stringify({
           msg: `Room: ${parsedData.roomId} joined!`,
@@ -73,16 +71,14 @@ wss.on("connection", (ws, request) => {
       if (!user) {
         return;
       }
-      console.log("leave-room:before: ", user);
       user.rooms = user?.rooms.filter((x) => x !== parsedData.roomId);
       user.ws.send(`Room: ${parsedData.roomId} leaved successfully`);
-      console.log("leave-room:after: ", user);
     }
 
     if (parsedData.type === "chat") {
       const roomId = parsedData.roomId;
       const message = parsedData.message;
-
+      console.log(parsedData)
       try {
         const res = await prismaClient.chat.create({
           data: {
@@ -105,7 +101,6 @@ wss.on("connection", (ws, request) => {
             );
           }
         });
-        console.log("res: ", res);
       } catch (error) {
         console.log("Error saving message: ", error);
       }

@@ -4,9 +4,13 @@ import roomRouter from "./routes/room.route.js";
 import chatRouter from "./routes/chat.route.js";
 import cookieParser from "cookie-parser";
 import { errorHandler } from "./middlewares/error.middleware.js";
+import cors from "cors";
 
 const app: Express = express();
 
+app.use(cors({
+  origin: "*"
+}))
 app.use(express.json());
 app.use(cookieParser());
 
@@ -17,8 +21,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/auth", authRouter);
-app.use("/room", roomRouter);
-app.use("/chat", chatRouter);
+app.use("/rooms", roomRouter);
+app.use("/chats", chatRouter);
 
 app.use(errorHandler);
 
