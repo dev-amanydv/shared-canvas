@@ -6,7 +6,7 @@ import WebSocket from "ws";
 import { prismaClient } from "@repo/db/client";
 
 const wss = new WebSocketServer({ port: 9000 });
-
+console.log(`Websocket is running at port: ${9000}`)
 interface AuthJwtPayload extends JwtPayload {
   userId?: string;
 }

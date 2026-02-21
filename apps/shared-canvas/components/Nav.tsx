@@ -1,4 +1,3 @@
-import { Hand, LockKeyholeOpen } from "lucide-react";
 
 export default function Nav() {
   return (

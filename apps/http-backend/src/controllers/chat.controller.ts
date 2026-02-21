@@ -12,8 +12,7 @@ export const getRoomChats = AsyncHandler(async (req, res) => {
         },
         orderBy: {
             id: "asc"
-        },
-        take: 30
+        }
     });
 
     res.status(200).json({

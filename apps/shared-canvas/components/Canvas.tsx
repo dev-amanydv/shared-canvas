@@ -21,7 +21,7 @@ export default function Canvas ({ roomId, socket }: {
             <div className="flex justify-center w-full">
                 <Nav />
             </div>
-            <canvas width={2000} height={1000} ref={canvasRef} ></canvas>
+            <canvas width={window.innerWidth} height={window.innerHeight} ref={canvasRef} ></canvas>
         </div>
     )
 }

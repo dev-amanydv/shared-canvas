@@ -20,7 +20,7 @@ model User {
   email     String   @unique
   avatar    String?
   rooms     Room[]
-  chats     Chat[]
+  Elements  Elements[]
   createdAt DateTime @default(now())
 }
 
@@ -30,11 +30,11 @@ model Room {
   slug      String   @unique
   createdAt DateTime @default(now())
   adminId   String
-  chats     Chat[]
+  Elements  Elements[]
   admin     User     @relation(fields: [adminId], references: [id])
 }
 
-model Chat {
+model Elements {
   id      Int    @unique @default(autoincrement())
   message String
   roomId  Int
