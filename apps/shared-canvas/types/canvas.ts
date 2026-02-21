@@ -10,7 +10,7 @@ export type TextAlign = "left" | "center" | "right"
 
 export type ArrowHead = "none" | "arrow" | "dot" | "bar"
 
-export type EdgeStyle = "shape" | "round" | "curved"
+export type EdgeStyle = "sharp" | "round" | "curved"
 
 export interface Point {
     x: number,

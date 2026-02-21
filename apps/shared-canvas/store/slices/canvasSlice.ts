@@ -1,7 +1,6 @@
-import { BinaryFile, ExcalidrawElement } from "@/types/canvas";
+import { BinaryFile, ElementBinding, ExcalidrawElement, Point } from "@/types/canvas";
 import { createSlice, nanoid, PayloadAction } from "@reduxjs/toolkit";
 import { stat } from "fs";
-import { act } from "react";
 
 interface CanvasState {
   elements: ExcalidrawElement[];
@@ -124,12 +123,82 @@ const canvasSlice = createSlice({
         const ids = new Set(action.payload);
         const [targets, rest] = partion(state.elements, (el) => ids.has(el.id))
         state.elements = [...targets, ...rest]
+    },
+
+    bringForward(state, action: PayloadAction<string[]>){
+      const ids = new Set(action.payload);
+      ids.forEach((id) => {
+        const i = state.elements.findIndex((el) => el.id === id);
+        if (i < state.elements.length - 1){
+          [state.elements[i], state.elements[i+1]] = [state.elements[i+1], state.elements[i]]
+        }
+      })
+    },
+
+    bringBackward(state, action: PayloadAction<string[]>){
+      const ids = new Set(action.payload);
+      ids.forEach((id) => {
+        const i = state.elements.findIndex((el) => el.id === id);
+        if (i > 0){
+          [state.elements[i], state.elements[i-1]] = [state.elements[i-1], state.elements[i]]
+        }
+      })
+    },
+
+    appendPointToElement(state, action: PayloadAction<{id: string, point: Point}>){
+      const { id, point } = action.payload;
+      const element = state.elements.find((el) => el.id === id);
+      if (element && (element.type === 'pencil' || element.type === "arrow" || element.type === "line")){
+          element.points.push(point);
+          element.version +=1;
+          element.updatedAt = Date.now()
+      }
+    },
+
+    updateTextContent(state, action: PayloadAction<{id: string, text: string}>){
+      const { id, text } = action.payload;
+      const element = state.elements.find((el) => el.id === id && el.type === "text");
+      if (element && element.type === "text"){
+        element.text = text;
+        element.version += 1;
+        element.updatedAt = Date.now()
+      }
+    },
+
+    setTextEditing(state, action: PayloadAction<{id: string, isEditing: boolean}>){
+      const { id, isEditing } = action.payload;
+      const element = state.elements.find((el) => el.id === id && el.type === "text");
+      if (element && element.type === "text"){
+        element.isEditing = isEditing
+      }
+    },
+
+    updateArrowBinding(state, action: PayloadAction<{id: string, startBinding: ElementBinding | null, endBinding: ElementBinding | null}>){
+      const { id, startBinding, endBinding } = action.payload;
+      const element = state.elements.find((e) => e.id === id && e.type === "arrow");
+      if (element && element.type === "arrow"){
+        if (element.startBinding !== undefined) element.startBinding = startBinding;
+        if (element.endBinding !== undefined) element.endBinding = endBinding;
+      }
+    },
+
+    addFile(state, action: PayloadAction<BinaryFile>){
+      state.files[action.payload.id] = action.payload;
+    },
+
+    clearCanvas(state) {
+      state.elements = [],
+      state.files = {}
+    },
+
+    loadElements(state, action: PayloadAction<{elements: ExcalidrawElement[], files: Record<string, BinaryFile>}>){
+      state.elements = action.payload.elements;
+      state.files = action.payload.files ?? {};
     }
 
-    
-    
   },
 });
+
 
 function partion<T>(arr: T[], predicate: (item: T) => boolean ): [T[], T[]]{
     const truthy: T[] = []
@@ -137,3 +206,9 @@ function partion<T>(arr: T[], predicate: (item: T) => boolean ): [T[], T[]]{
     arr.forEach((item) => (predicate(item) ? truthy : falsy).push(item));
     return [truthy, falsy]
 }
+
+export const {
+  addElement, updateElement, deleteElement, duplicateElements, updateTextContent, moveElements, resizeElement, rotateElement, sendToBack, bringToFront, bringBackward, bringForward, appendPointToElement, updateArrowBinding, addFile, clearCanvas, loadElements, setTextEditing
+} = canvasSlice.actions;
+
+export default canvasSlice.reducer;
