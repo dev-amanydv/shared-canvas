@@ -73,7 +73,7 @@ const toolSlice = createSlice({
         },
         resetToolOptions(state){
             state.toolOptions = defaultOptions
-        }
+        },
     }
 })
 

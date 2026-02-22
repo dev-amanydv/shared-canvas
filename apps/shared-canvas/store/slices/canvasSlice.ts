@@ -1,6 +1,5 @@
 import { BinaryFile, ElementBinding, ExcalidrawElement, Point } from "@/types/canvas";
 import { createSlice, nanoid, PayloadAction } from "@reduxjs/toolkit";
-import { stat } from "fs";
 
 interface CanvasState {
   elements: ExcalidrawElement[];
@@ -19,7 +18,6 @@ const canvasSlice = createSlice({
     addElement(state, action: PayloadAction<ExcalidrawElement>) {
       state.elements.push(action.payload);
     },
-
     updateElement(
       state,
       action: PayloadAction<{
@@ -39,7 +37,6 @@ const canvasSlice = createSlice({
         updatedAt: Date.now(),
       } as ExcalidrawElement;
     },
-
     deleteElement(state, action: PayloadAction<string[]>) {
       const ids = new Set(action.payload);
       state.elements.forEach((el) => {
@@ -48,7 +45,6 @@ const canvasSlice = createSlice({
         }
       });
     },
-
     duplicateElements(state, action: PayloadAction<string[]>) {
       const ids = new Set(action.payload);
       const toDuplicate = state.elements.filter((el) => {
@@ -66,7 +62,6 @@ const canvasSlice = createSlice({
       }));
       state.elements.push(...duplicates);
     },
-
     moveElements(
       state,
       action: PayloadAction<{ ids: string[]; dx: number; dy: number }>,
@@ -82,7 +77,6 @@ const canvasSlice = createSlice({
         }
       });
     },
-
     resizeElement(state, action: PayloadAction<{id: string, x: number, y: number, height: number, width: number}>){
         const { id, x, y, width, height } = action.payload;
         const index = state.elements.findIndex((el) => el.id === id);
@@ -99,7 +93,6 @@ const canvasSlice = createSlice({
             updatedAt: Date.now()
         }
     },
-
     rotateElement(state, action: PayloadAction<{ids: string[], angle: number}>){
         const { ids, angle } = action.payload;
         const idsSet = new Set(ids);
@@ -112,19 +105,16 @@ const canvasSlice = createSlice({
             }
         })
     },
-
     bringToFront(state, action: PayloadAction<string[]>){
         const ids = new Set(action.payload);
         const [targets, rest] = partion(state.elements, (el) => ids.has(el.id));
         state.elements = [...rest, ...targets]
     },
-
     sendToBack(state, action: PayloadAction<string[]>){
         const ids = new Set(action.payload);
         const [targets, rest] = partion(state.elements, (el) => ids.has(el.id))
         state.elements = [...targets, ...rest]
     },
-
     bringForward(state, action: PayloadAction<string[]>){
       const ids = new Set(action.payload);
       ids.forEach((id) => {
@@ -134,7 +124,6 @@ const canvasSlice = createSlice({
         }
       })
     },
-
     bringBackward(state, action: PayloadAction<string[]>){
       const ids = new Set(action.payload);
       ids.forEach((id) => {
@@ -144,7 +133,6 @@ const canvasSlice = createSlice({
         }
       })
     },
-
     appendPointToElement(state, action: PayloadAction<{id: string, point: Point}>){
       const { id, point } = action.payload;
       const element = state.elements.find((el) => el.id === id);
@@ -154,7 +142,6 @@ const canvasSlice = createSlice({
           element.updatedAt = Date.now()
       }
     },
-
     updateTextContent(state, action: PayloadAction<{id: string, text: string}>){
       const { id, text } = action.payload;
       const element = state.elements.find((el) => el.id === id && el.type === "text");
@@ -164,7 +151,6 @@ const canvasSlice = createSlice({
         element.updatedAt = Date.now()
       }
     },
-
     setTextEditing(state, action: PayloadAction<{id: string, isEditing: boolean}>){
       const { id, isEditing } = action.payload;
       const element = state.elements.find((el) => el.id === id && el.type === "text");
@@ -172,7 +158,6 @@ const canvasSlice = createSlice({
         element.isEditing = isEditing
       }
     },
-
     updateArrowBinding(state, action: PayloadAction<{id: string, startBinding: ElementBinding | null, endBinding: ElementBinding | null}>){
       const { id, startBinding, endBinding } = action.payload;
       const element = state.elements.find((e) => e.id === id && e.type === "arrow");
@@ -181,21 +166,17 @@ const canvasSlice = createSlice({
         if (element.endBinding !== undefined) element.endBinding = endBinding;
       }
     },
-
     addFile(state, action: PayloadAction<BinaryFile>){
       state.files[action.payload.id] = action.payload;
     },
-
     clearCanvas(state) {
       state.elements = [],
       state.files = {}
     },
-
     loadElements(state, action: PayloadAction<{elements: ExcalidrawElement[], files: Record<string, BinaryFile>}>){
       state.elements = action.payload.elements;
       state.files = action.payload.files ?? {};
     }
-
   },
 });
 

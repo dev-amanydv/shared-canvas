@@ -1,6 +1,5 @@
 import { ExcalidrawElement } from "@/types/canvas";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { stat } from "fs";
 
 interface HistoryEntry {
     elements: ExcalidrawElement[];
@@ -38,11 +37,11 @@ const historySlice = createSlice({
                 state.undoStack.shift()
             }
         },
-        undoStack(state){
+        undo(state){
             const last = state.undoStack.pop();
             if (last) state.redoStack.push(last)
         },
-        redoStack(state){
+        redo(state){
             const next = state.redoStack.pop();
             if (next) state.undoStack.push(next);
         },
@@ -53,5 +52,5 @@ const historySlice = createSlice({
     }
 });
 
-export const { pushToHistory, undoStack, redoStack, clearHistory } = historySlice.actions;
+export const { pushToHistory, undo, redo, clearHistory } = historySlice.actions;
 export default historySlice.reducer;
