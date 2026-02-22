@@ -12,7 +12,7 @@ import { renderCanvas } from "@/utils/renderCanvas";
 import { useEffect, useRef } from "react";
 
 export function useCanvasDraw(
-  canvasRef: React.RefObject<HTMLCanvasElement>,
+  canvasRef: React.RefObject<HTMLCanvasElement | null>,
   socket: WebSocket,
   roomId: string,
 ) {
