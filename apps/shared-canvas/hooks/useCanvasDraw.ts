@@ -8,6 +8,7 @@ import { pushToHistory } from "@/store/slices/historySlice";
 import { revertToSelect } from "@/store/slices/toolSlice";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { createRectangleElement } from "@/utils/elementFactory";
+import { renderCanvas } from "@/utils/renderCanvas";
 import { useEffect, useRef } from "react";
 
 export function useCanvasDraw(
@@ -30,6 +31,7 @@ export function useCanvasDraw(
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
+    if (!ctx) return;
     renderCanvas(ctx, canvas, elements);
   }, [elements, canvasRef]);
 
