@@ -1,7 +1,7 @@
 import { ArrowHead, EdgeStyle, FillStyle, FontFamily, StrokeStyle, TextAlign, ToolType } from "@/types/canvas";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface ToolOptions {
+export interface ToolOptions {
     strokeColor: string,
     backgroundColor: string,
     fillStyle: FillStyle,
