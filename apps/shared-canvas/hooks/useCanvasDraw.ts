@@ -21,7 +21,7 @@ export function useCanvasDraw(
   const activeTool = useAppSelector(selectActiveTool);
   const toolOptions = useAppSelector(selectToolOptions);
   const elements = useAppSelector(selectVisibleElements);
-
+  
   const isDrawing = useRef(false);
   const startX = useRef(0);
   const startY = useRef(0);
@@ -39,7 +39,6 @@ export function useCanvasDraw(
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2x");
-    if (!ctx) return;
 
     const onMouseDown = (e: MouseEvent) => {
       if (activeTool === "hand" || activeTool === "select") return;
@@ -110,18 +109,17 @@ export function useCanvasDraw(
           height: height,
         };
 
-        socket.send(
-          JSON.stringify({
-            type: "chat",
-            message: JSON.stringify(finalElement),
-            roomId,
-          }),
-        );
+        // socket.send(
+        //   JSON.stringify({
+        //     type: "chat",
+        //     message: JSON.stringify(finalElement),
+        //     roomId,
+        //   }),
+        // );
       }
       activeId.current = null;
       dispatch(revertToSelect());
     };
-
     canvas.addEventListener("mousedown", onMouseDown);
     canvas.addEventListener("mousemove", onMouseMove);
     canvas.addEventListener("mouseup", onMouseUp);

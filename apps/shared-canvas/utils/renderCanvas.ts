@@ -7,10 +7,9 @@ export function renderCanvas (
     elements: ExcalidrawElement[]
 ) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+    console.log("elements: ", elements)
     elements.forEach((el) => {
         if (el.isDeleted) return;
-
         ctx.save();
 
         ctx.globalAlpha = el.opacity / 100;

@@ -1,11 +1,23 @@
+import { useAppDispatch, useAppSelector } from "@/store/store";
+import { setActiveTool, toogleToolLock } from "@/store/slices/toolSlice";
+import { selectActiveTool } from "@/store/selectors";
+import { ToolType } from "@/types/canvas";
 
 export default function Nav() {
+  const dispatch = useAppDispatch();
+  const activeTool = useAppSelector(selectActiveTool);
+
+  const toolClass = (tool: ToolType) =>
+    `rounded-lg h-[36px] w-[36px] flex justify-center items-center cursor-pointer ${
+      activeTool === tool ? "bg-[#E0DFFE]" : "hover:bg-[#F1F0FE]"
+    }`;
+
   return (
     <div className="h-[44px] bg-white gap-[2px] grid grid-rows-[auto] grid-flow-col auto-cols-min w-[506px] border rounded-[.5rem] shadow-[0px_0px_.93px_0px_rgba(0,0,0,.17),0px_0px_3.13px_0px_rgba(0,0,0,.08),0px_7px_14px_0px_rgba(0,0,0,.05)] z-20 border-[#ECECEC] p-[4px] absolute top-10 mx-auto">
       <div>
         <label
-          className=" hover:bg-[#F1F0FE] rounded-lg h-[36px] w-[36px] flex justify-center items-center"
-          htmlFor="Keep selected tool active after drawing — Q"
+          className=" hover:bg-[#F1F0FE] rounded-lg h-[36px] w-[36px] flex justify-center items-center cursor-pointer"
+          onClick={() => dispatch(toogleToolLock())}
           title="Keep selected tool active after drawing — Q"
         >
           <div className="ToolIcon__icon">
@@ -60,9 +72,9 @@ export default function Nav() {
       </div>
       <div>
         <label
-          className=" hover:bg-[#F1F0FE] rounded-lg h-[36px] w-[36px] flex justify-center items-center"
-          htmlFor="Keep selected tool active after drawing — Q"
-          title="Keep selected tool active after drawing — Q"
+          className={toolClass("hand")}
+          onClick={() => dispatch(setActiveTool("hand"))}
+          title="Hand (panning) — H"
         >
           <div className="">
             <svg
@@ -90,9 +102,9 @@ export default function Nav() {
       </div>
       <div>
         <label
-          className=" hover:bg-[#F1F0FE] rounded-lg h-[36px] w-[36px] flex justify-center items-center"
-          htmlFor="Keep selected tool active after drawing — Q"
-          title="Keep selected tool active after drawing — Q"
+          className={toolClass("select")}
+          onClick={() => dispatch(setActiveTool("select"))}
+          title="Selection — V"
         >
           <div className="ToolIcon__icon">
             <svg
@@ -122,9 +134,9 @@ export default function Nav() {
       </div>
       <div>
         <label
-          className=" hover:bg-[#F1F0FE] rounded-lg h-[36px] w-[36px] flex justify-center items-center"
-          htmlFor="Keep selected tool active after drawing — Q"
-          title="Keep selected tool active after drawing — Q"
+          className={toolClass("rectangle")}
+          onClick={() => dispatch(setActiveTool("rectangle"))}
+          title="Rectangle — R"
         >
           <div>
             <svg
@@ -149,9 +161,9 @@ export default function Nav() {
       </div>
       <div>
         <label
-          className=" hover:bg-[#F1F0FE] rounded-lg h-[36px] w-[36px] flex justify-center items-center"
-          htmlFor="Keep selected tool active after drawing — Q"
-          title="Keep selected tool active after drawing — Q"
+          className={toolClass("diamond")}
+          onClick={() => dispatch(setActiveTool("diamond"))}
+          title="Diamond — D"
         >
           <div className="ToolIcon__icon text-black">
             <svg
@@ -177,34 +189,34 @@ export default function Nav() {
       </div>
       <div>
         <label
-          className=" hover:bg-[#F1F0FE] rounded-lg h-[36px] w-[36px] flex justify-center items-center"
-          htmlFor="Keep selected tool active after drawing — Q"
-          title="Keep selected tool active after drawing — Q"
+          className={toolClass("line")}
+          onClick={() => dispatch(setActiveTool("line"))}
+          title="Line — L"
         >
           <div className="ToolIcon__icon text-black">
-  <svg 
-    aria-hidden="true" 
-    focusable="false" 
-    role="img" 
-    viewBox="0 0 20 20" 
-    className="size-[16px]" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeLinecap="round" 
-    strokeLinejoin="round"
-  >
-    <path d="M4.167 10h11.666" strokeWidth="1.5"></path>
-  </svg>
-  <span className="ToolIcon__keybinding hidden">6</span>
-</div>
+            <svg
+              aria-hidden="true"
+              focusable="false"
+              role="img"
+              viewBox="0 0 20 20"
+              className="size-[16px]"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M4.167 10h11.666" strokeWidth="1.5"></path>
+            </svg>
+            <span className="ToolIcon__keybinding hidden">6</span>
+          </div>
         </label>
       </div>
-      
+
       <div>
         <label
-          className=" hover:bg-[#F1F0FE] rounded-lg h-[36px] w-[36px] flex justify-center items-center"
-          htmlFor="Keep selected tool active after drawing — Q"
-          title="Keep selected tool active after drawing — Q"
+          className={toolClass("arrow")}
+          onClick={() => dispatch(setActiveTool("arrow"))}
+          title="Arrow — A"
         >
           <div className="ToolIcon__icon text-black">
             <svg
@@ -232,9 +244,9 @@ export default function Nav() {
       </div>
       <div>
         <label
-          className=" hover:bg-[#F1F0FE] rounded-lg h-[36px] w-[36px] flex justify-center items-center"
-          htmlFor="Keep selected tool active after drawing — Q"
-          title="Keep selected tool active after drawing — Q"
+          className={toolClass("circle")}
+          onClick={() => dispatch(setActiveTool("circle"))}
+          title="Circle — O"
         >
           <div className="ToolIcon__icon text-black">
             <svg
@@ -260,9 +272,9 @@ export default function Nav() {
       </div>
       <div>
         <label
-          className=" hover:bg-[#F1F0FE] rounded-lg h-[36px] w-[36px] flex justify-center items-center"
-          htmlFor="Keep selected tool active after drawing — Q"
-          title="Keep selected tool active after drawing — Q"
+          className={toolClass("pencil")}
+          onClick={() => dispatch(setActiveTool("pencil"))}
+          title="Pencil — P"
         >
           <div className="ToolIcon__icon text-black">
             <svg
@@ -290,9 +302,9 @@ export default function Nav() {
       </div>
       <div>
         <label
-          className=" hover:bg-[#F1F0FE] rounded-lg h-[36px] w-[36px] flex justify-center items-center"
-          htmlFor="Keep selected tool active after drawing — Q"
-          title="Keep selected tool active after drawing — Q"
+          className={toolClass("text")}
+          onClick={() => dispatch(setActiveTool("text"))}
+          title="Text — T"
         >
           <div className="ToolIcon__icon text-black">
             <svg
@@ -321,87 +333,85 @@ export default function Nav() {
       </div>
       <div>
         <label
-          className=" hover:bg-[#F1F0FE] rounded-lg h-[36px] w-[36px] flex justify-center items-center"
-          htmlFor="Keep selected tool active after drawing — Q"
-          title="Keep selected tool active after drawing — Q"
+          className="hover:bg-[#F1F0FE] rounded-lg h-[36px] w-[36px] flex justify-center items-center cursor-pointer"
+          title="Image"
         >
           <div className="ToolIcon__icon text-black">
-  <svg 
-    aria-hidden="true" 
-    focusable="false" 
-    role="img" 
-    viewBox="0 0 20 20" 
-    className="size-[16px]" 
-    fill="none" 
-    stroke="currentColor" 
-    strokeLinecap="round" 
-    strokeLinejoin="round"
-  >
-    <g strokeWidth="1.25">
-      <path d="M12.5 6.667h.01"></path>
-      <path d="M4.91 2.625h10.18a2.284 2.284 0 0 1 2.285 2.284v10.182a2.284 2.284 0 0 1-2.284 2.284H4.909a2.284 2.284 0 0 1-2.284-2.284V4.909a2.284 2.284 0 0 1 2.284-2.284Z"></path>
-      <path d="m3.333 12.5 3.334-3.333c.773-.745 1.726-.745 2.5 0l4.166 4.166"></path>
-      <path d="m11.667 11.667.833-.834c.774-.744 1.726-.744 2.5 0l1.667 1.667"></path>
-    </g>
-  </svg>
-  <span className="ToolIcon__keybinding hidden">9</span>
-</div>
+            <svg
+              aria-hidden="true"
+              focusable="false"
+              role="img"
+              viewBox="0 0 20 20"
+              className="size-[16px]"
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <g strokeWidth="1.25">
+                <path d="M12.5 6.667h.01"></path>
+                <path d="M4.91 2.625h10.18a2.284 2.284 0 0 1 2.285 2.284v10.182a2.284 2.284 0 0 1-2.284 2.284H4.909a2.284 2.284 0 0 1-2.284-2.284V4.909a2.284 2.284 0 0 1 2.284-2.284Z"></path>
+                <path d="m3.333 12.5 3.334-3.333c.773-.745 1.726-.745 2.5 0l4.166 4.166"></path>
+                <path d="m11.667 11.667.833-.834c.774-.744 1.726-.744 2.5 0l1.667 1.667"></path>
+              </g>
+            </svg>
+            <span className="ToolIcon__keybinding hidden">9</span>
+          </div>
         </label>
       </div>
       <div>
         <label
-          className=" hover:bg-[#F1F0FE] rounded-lg h-[36px] w-[36px] flex justify-center items-center"
-          htmlFor="Keep selected tool active after drawing — Q"
-          title="Keep selected tool active after drawing — Q"
+          className={toolClass("eraser")}
+          onClick={() => dispatch(setActiveTool("eraser"))}
+          title="Eraser — E"
         >
-            <div className="ToolIcon__icon text-black">
-  <svg 
-    aria-hidden="true" 
-    focusable="false" 
-    role="img" 
-    viewBox="0 0 24 24" 
-    className="size-[16px]" 
-    fill="none" 
-    strokeWidth="2" 
-    stroke="currentColor" 
-    strokeLinecap="round" 
-    strokeLinejoin="round"
-  >
-    <g strokeWidth="1.5">
-      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-      <path d="M19 20h-10.5l-4.21 -4.3a1 1 0 0 1 0 -1.41l10 -10a1 1 0 0 1 1.41 0l5 5a1 1 0 0 1 0 1.41l-9.2 9.3"></path>
-      <path d="M18 13.3l-6.3 -6.3"></path>
-    </g>
-  </svg>
-  <span className="ToolIcon__keybinding hidden">0</span>
-</div>
+          <div className="ToolIcon__icon text-black">
+            <svg
+              aria-hidden="true"
+              focusable="false"
+              role="img"
+              viewBox="0 0 24 24"
+              className="size-[16px]"
+              fill="none"
+              strokeWidth="2"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <g strokeWidth="1.5">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <path d="M19 20h-10.5l-4.21 -4.3a1 1 0 0 1 0 -1.41l10 -10a1 1 0 0 1 1.41 0l5 5a1 1 0 0 1 0 1.41l-9.2 9.3"></path>
+                <path d="M18 13.3l-6.3 -6.3"></path>
+              </g>
+            </svg>
+            <span className="ToolIcon__keybinding hidden">0</span>
+          </div>
         </label>
       </div>
       <div>
         <label
-          className=" hover:bg-[#F1F0FE] rounded-lg h-[36px] w-[36px] flex justify-center items-center"
-          htmlFor="Keep selected tool active after drawing — Q"
-          title="Keep selected tool active after drawing — Q"
+          className="hover:bg-[#F1F0FE] rounded-lg h-[36px] w-[36px] flex justify-center items-center cursor-pointer"
+          title="Library"
         >
-            <svg 
-  aria-hidden="true" 
-  focusable="false" 
-  role="img" 
-  viewBox="0 0 24 24" 
-  className="size-[16px] text-black" 
-  fill="none" 
-  strokeWidth="2" 
-  stroke="currentColor" 
-  strokeLinecap="round" 
-  strokeLinejoin="round"
->
-  <g strokeWidth="1.5">
-    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-    <path d="M12 3l-4 7h8z"></path>
-    <path d="M17 17m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"></path>
-    <path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"></path>
-  </g>
-</svg>
+          <svg
+            aria-hidden="true"
+            focusable="false"
+            role="img"
+            viewBox="0 0 24 24"
+            className="size-[16px] text-black"
+            fill="none"
+            strokeWidth="2"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <g strokeWidth="1.5">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M12 3l-4 7h8z"></path>
+              <path d="M17 17m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"></path>
+              <path d="M4 14m0 1a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v4a1 1 0 0 1 -1 1h-4a1 1 0 0 1 -1 -1z"></path>
+            </g>
+          </svg>
         </label>
       </div>
     </div>

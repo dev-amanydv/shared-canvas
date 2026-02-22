@@ -35,7 +35,6 @@ export const initDraw = async (
     if (message.type === "chat") {
       const parsedShape = JSON.parse(message.message);
       existingShapes.push(parsedShape);
-      console.log("Existing shapes: ", existingShapes);
       clearCanvas(ctx, canvas, existingShapes);
     }
   };
