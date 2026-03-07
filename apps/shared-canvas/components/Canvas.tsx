@@ -2,6 +2,7 @@
 import { initDraw } from "@/draw";
 import { useEffect, useRef } from "react";
 import Nav from "./Nav";
+import ToolOptionsPanel from "./ToolOptionsPanel";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { selectActiveTool } from "@/store/selectors";
 import axios from "axios";
@@ -35,14 +36,16 @@ export default function Canvas({
 
   useEffect(() => {
     const loadExisting = async () => {
-        const res = await axios.get(`${HTTP_BACKEND}/chats/${roomId}`)
-        const messages = res.data.data.chats;
+      const res = await axios.get(`${HTTP_BACKEND}/chats/${roomId}`);
+      const messages = res.data.data.chats;
 
-        const elements = messages.map((x: { message: string }) => JSON.parse(x.message))
-        dispatch(loadElements(elements));
-    }
+      const elements = messages.map((x: { message: string }) =>
+        JSON.parse(x.message),
+      );
+      dispatch(loadElements(elements));
+    };
     // loadExisting();
-  }, [roomId, dispatch])
+  }, [roomId, dispatch]);
 
   useEffect(() => {
     // socket.onmessage = (event) => {
@@ -54,17 +57,21 @@ export default function Canvas({
     // }
   }, [socket, dispatch]);
 
-  useCanvasDraw(canvasRef, socket, roomId)
+  useCanvasDraw(canvasRef, socket, roomId);
 
   return (
     <div className="w-full h-full">
       <div className="flex justify-center w-full">
         <Nav />
       </div>
+      <ToolOptionsPanel />
       <canvas
         width={window.innerWidth}
         height={window.innerHeight}
-        style={{cursor: CURSOR_MAP[activeTool] ?? "crosshair", imageRendering: "pixelated"}}
+        style={{
+          cursor: CURSOR_MAP[activeTool] ?? "crosshair",
+          imageRendering: "pixelated",
+        }}
         ref={canvasRef}
         className="absolute inset-0 bg-white"
       ></canvas>
