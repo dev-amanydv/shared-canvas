@@ -95,6 +95,7 @@ function drawDiamond (
     ctx.lineTo(el.x + el.width, cy);
     ctx.lineTo(cx, el.y + el.height);
     ctx.lineTo(el.x, cy);
+    ctx.lineTo(cx, el.y)
 
     if (el.backgroundColor !== "transparent"){
         ctx.fillStyle = el.backgroundColor;
