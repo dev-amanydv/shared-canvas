@@ -7,7 +7,7 @@ import { addElement, updateElement } from "@/store/slices/canvasSlice";
 import { pushToHistory } from "@/store/slices/historySlice";
 import { revertToSelect } from "@/store/slices/toolSlice";
 import { useAppDispatch, useAppSelector } from "@/store/store";
-import { createRectangleElement } from "@/utils/elementFactory";
+import { createCircleElement, createDiamondElement, createRectangleElement } from "@/utils/elementFactory";
 import { renderCanvas } from "@/utils/renderCanvas";
 import { useEffect, useRef } from "react";
 
@@ -17,7 +17,6 @@ export function useCanvasDraw(
   roomId: string,
 ) {
   const dispatch = useAppDispatch();
-
   const activeTool = useAppSelector(selectActiveTool);
   const toolOptions = useAppSelector(selectToolOptions);
   const elements = useAppSelector(selectVisibleElements);
@@ -62,6 +61,35 @@ export function useCanvasDraw(
         dispatch(addElement(newRect));
         activeId.current = newRect.id;
       }
+      if (activeTool === "circle"){
+        dispatch(pushToHistory({
+          elements,
+          actionType: "add-circle"
+        }));
+
+        const newCircle = createCircleElement(
+          e.clientX,
+          e.clientY,
+          toolOptions
+        );
+        dispatch(addElement(newCircle));
+        activeId.current = newCircle.id
+      }
+      if (activeTool === "diamond"){
+        dispatch(pushToHistory({
+          elements,
+          actionType: "add-diamond"
+        }));
+
+        const newDiamond = createDiamondElement(
+          e.clientX,
+          e.clientY,
+          toolOptions
+        );
+
+        dispatch(addElement(newDiamond));
+        activeId.current = newDiamond.id
+      }
     };
 
     const onMouseMove = (e: MouseEvent) => {
@@ -80,6 +108,28 @@ export function useCanvasDraw(
             },
           }),
         );
+      };
+      if (activeTool === "circle"){
+        dispatch(
+          updateElement({
+            id: activeId.current,
+            updates: {
+             width,
+             height
+            }
+          })
+        )
+      };
+      if (activeTool === "diamond"){
+        dispatch(
+          updateElement({
+            id: activeId.current,
+            updates: {
+              width,
+              height
+            }
+          })
+        )
       }
     };
 
@@ -116,6 +166,24 @@ export function useCanvasDraw(
         //     roomId,
         //   }),
         // );
+      }
+      if (activeTool === "circle"){
+        dispatch(updateElement({
+          id: activeId.current,
+          updates: {
+            width,
+            height
+          }
+        }))
+      };
+      if (activeTool === "diamond"){
+        dispatch(updateElement({
+          id: activeId.current,
+          updates: {
+            width,
+            height
+          }
+        }))
       }
       activeId.current = null;
       dispatch(revertToSelect());

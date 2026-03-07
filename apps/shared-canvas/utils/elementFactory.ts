@@ -1,5 +1,5 @@
 import type { ToolOptions } from "@/store/slices/toolSlice";
-import { RectangleElement } from "@/types/canvas";
+import { CircleElement, DiamondElement, RectangleElement } from "@/types/canvas";
 import { nanoid } from "@reduxjs/toolkit";
 
 export function createRectangleElement (
@@ -31,4 +31,64 @@ export function createRectangleElement (
         updatedAt: Date.now()
 
     }
+};
+
+export function createCircleElement (
+    startX: number,
+    startY: number,
+    options: ToolOptions
+): CircleElement {
+    return {
+        id: nanoid(),
+        type: "circle",
+        x: startX,
+        y: startY,
+        height: 0,
+        width: 0,
+        angle: 0,
+        strokeColor: options.strokeColor,
+        backgroundColor: options.backgroundColor,
+        fillStyle: options.fillStyle,
+        strokeWidth: options.strokeWidth,
+        strokeStyle: options.strokeStyle,
+        opacity: options.opacity,
+        roughness: options.roughness,
+        isDeleted: false,
+        isLocked: false,
+        seed: Math.floor(Math.random() * 100000),
+        version: 1,
+        createdAt: Date.now(),
+        updatedAt: Date.now()      
+    }
+};
+
+export function createDiamondElement (
+    startX: number,
+    startY: number,
+    options: ToolOptions
+): DiamondElement {
+    
+    return {
+        id: nanoid(),
+        type: "diamond",
+        x: startX,
+        y: startY,
+        height: 0,
+        width: 0,
+        angle:0,
+        strokeColor: options.strokeColor,
+        backgroundColor: options.backgroundColor,
+        fillStyle: options.fillStyle,
+        strokeWidth: options.strokeWidth,
+        strokeStyle: options.strokeStyle,
+        opacity: options.opacity,
+        roughness: options.roughness,
+        isDeleted: false,
+        isLocked: false,
+        seed: Math.floor(Math.random() * 100000),
+        version: 1,
+        createdAt: Date.now(),
+        updatedAt: Date.now()
+    }
 }
+

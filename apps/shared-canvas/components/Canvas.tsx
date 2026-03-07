@@ -64,7 +64,7 @@ export default function Canvas({
       <canvas
         width={window.innerWidth}
         height={window.innerHeight}
-        style={{cursor: CURSOR_MAP[activeTool] ?? "crosshair"}}
+        style={{cursor: CURSOR_MAP[activeTool] ?? "crosshair", imageRendering: "pixelated"}}
         ref={canvasRef}
         className="absolute inset-0 bg-white"
       ></canvas>
