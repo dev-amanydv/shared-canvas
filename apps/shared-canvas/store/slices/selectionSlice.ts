@@ -1,7 +1,5 @@
 import { BoundingBox } from "@/types/canvas";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { stat } from "fs";
-
 
 interface SelectionState {
     selectedIds: string[];
