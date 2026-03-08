@@ -1,4 +1,6 @@
 import { ExcalidrawElement } from "@/types/canvas";
+import rough from "roughjs";
+import type { Options } from "roughjs/bin/core";
 
 export function renderCanvas(
   ctx: CanvasRenderingContext2D,
@@ -6,38 +8,51 @@ export function renderCanvas(
   elements: ExcalidrawElement[],
 ) {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  console.log("elements: ", elements);
+  const rc = rough.canvas(canvas);
+
   elements.forEach((el) => {
     if (el.isDeleted) return;
     ctx.save();
-
     ctx.globalAlpha = el.opacity / 100;
-    ctx.strokeStyle = el.strokeStyle;
-    ctx.lineWidth = el.strokeWidth;
 
-    if (el.strokeStyle === "dashed") ctx.setLineDash([8, 4]);
-    else if (el.strokeStyle === "dotted") ctx.setLineDash([2, 4]);
-    else ctx.setLineDash([]);
+    const roughOptions: Options = {
+      seed: el.seed,
+      roughness: el.roughness,
+      strokeWidth: el.strokeWidth,
+      stroke: el.strokeColor,
+      fill:
+        el.backgroundColor !== "transparent" ? el.backgroundColor : undefined,
+      fillStyle:
+        el.fillStyle === "none"
+          ? undefined
+          : (el.fillStyle as "solid" | "hachure" | "cross-hatch"),
+      strokeLineDash:
+        el.strokeStyle === "dashed"
+          ? [12, 8]
+          : el.strokeStyle === "dotted"
+            ? [3, 6]
+            : undefined,
+    };
 
     switch (el.type) {
       case "rectangle":
-        drawRectangle(ctx, el);
+        drawRectangle(rc, ctx, el, roughOptions);
         break;
 
       case "circle":
-        drawCircle(ctx, el);
+        drawCircle(rc, el, roughOptions);
         break;
 
       case "diamond":
-        drawDiamond(ctx, el);
+        drawDiamond(rc, el, roughOptions);
         break;
 
       case "line":
-        drawLine(ctx, el);
+        drawLine(rc, el, roughOptions);
         break;
 
       case "arrow":
-        drawArrow(ctx, el);
+        drawArrow(rc, el, roughOptions);
         break;
 
       case "pencil":
@@ -53,92 +68,116 @@ export function renderCanvas(
 }
 
 function drawRectangle(
+  rc: ReturnType<typeof rough.canvas>,
   ctx: CanvasRenderingContext2D,
   el: Extract<ExcalidrawElement, { type: "rectangle" }>,
+  options: Options,
 ) {
-  ctx.beginPath();
   if (el.edgeStyle === "round") {
-    ctx.roundRect(el.x, el.y, el.width, el.height, [10]);
+    const radius = Math.min(
+      Math.min(Math.abs(el.width), Math.abs(el.height)) * 0.25,
+      32,
+    );
+    const x = el.x;
+    const y = el.y;
+    const w = el.width;
+    const h = el.height;
+    const r = radius;
+
+    const nx = w < 0 ? x + w : x;
+    const ny = h < 0 ? y + h : y;
+    const nw = Math.abs(w);
+    const nh = Math.abs(h);
+    const nr = Math.min(r, nw / 2, nh / 2);
+
+    const path = `M ${nx + nr} ${ny} 
+      L ${nx + nw - nr} ${ny} 
+      Q ${nx + nw} ${ny} ${nx + nw} ${ny + nr} 
+      L ${nx + nw} ${ny + nh - nr} 
+      Q ${nx + nw} ${ny + nh} ${nx + nw - nr} ${ny + nh} 
+      L ${nx + nr} ${ny + nh} 
+      Q ${nx} ${ny + nh} ${nx} ${ny + nh - nr} 
+      L ${nx} ${ny + nr} 
+      Q ${nx} ${ny} ${nx + nr} ${ny} Z`;
+
+    rc.path(path, options);
   } else {
-    ctx.rect(el.x, el.y, el.width, el.height);
+    rc.rectangle(el.x, el.y, el.width, el.height, options);
   }
-
-  if (el.backgroundColor !== "transparent") {
-    ctx.fillStyle = el.backgroundColor;
-    ctx.fill();
-  }
-
-  ctx.strokeStyle = el.strokeColor;
-  ctx.stroke();
 }
 
 function drawCircle(
-  ctx: CanvasRenderingContext2D,
+  rc: ReturnType<typeof rough.canvas>,
   el: Extract<ExcalidrawElement, { type: "circle" }>,
+  options: Options,
 ) {
-  const radiusX = Math.abs(el.width / 2);
-  const radiusY = Math.abs(el.height / 2);
   const cx = el.x + el.width / 2;
   const cy = el.y + el.height / 2;
-
-  ctx.beginPath();
-  ctx.ellipse(cx, cy, radiusX, radiusY, 0, 0, Math.PI * 2);
-
-  if (el.backgroundColor !== "transparent") {
-    ctx.fillStyle = el.backgroundColor;
-    ctx.fill();
-  }
-  ctx.stroke();
+  rc.ellipse(cx, cy, Math.abs(el.width), Math.abs(el.height), options);
 }
 
 function drawDiamond(
-  ctx: CanvasRenderingContext2D,
+  rc: ReturnType<typeof rough.canvas>,
   el: Extract<ExcalidrawElement, { type: "diamond" }>,
+  options: Options,
 ) {
   const cx = el.x + el.width / 2;
   const cy = el.y + el.height / 2;
-
-  ctx.beginPath();
-  ctx.moveTo(cx, el.y);
-  ctx.lineTo(el.x + el.width, cy);
-  ctx.lineTo(cx, el.y + el.height);
-  ctx.lineTo(el.x, cy);
-  ctx.lineTo(cx, el.y);
-
-  if (el.backgroundColor !== "transparent") {
-    ctx.fillStyle = el.backgroundColor;
-    ctx.fill();
-  }
-
-  ctx.stroke();
+  const points: [number, number][] = [
+    [cx, el.y],
+    [el.x + el.width, cy],
+    [cx, el.y + el.height],
+    [el.x, cy],
+  ];
+  rc.polygon(points, options);
 }
 
 function drawLine(
-  ctx: CanvasRenderingContext2D,
+  rc: ReturnType<typeof rough.canvas>,
   el: Extract<ExcalidrawElement, { type: "line" }>,
+  options: Options,
 ) {
   if (el.points.length < 2) return;
-
-  ctx.beginPath();
-  ctx.moveTo(el.x + el.points[0].x, el.y + el.points[0].y);
-  el.points.slice(1).forEach((p) => {
-    ctx.lineTo(el.x + p.x, el.y + p.y);
-  });
-  ctx.stroke;
+  const points: [number, number][] = el.points.map((p) => [
+    el.x + p.x,
+    el.y + p.y,
+  ]);
+  rc.linearPath(points, options);
 }
 
 function drawArrow(
-  ctx: CanvasRenderingContext2D,
+  rc: ReturnType<typeof rough.canvas>,
   el: Extract<ExcalidrawElement, { type: "arrow" }>,
+  options: Options,
 ) {
   if (el.points.length < 2) return;
 
-  ctx.beginPath();
-  ctx.moveTo(el.x + el.points[0].x, el.y + el.points[0].y);
-  el.points.slice(1).forEach((p) => {
-    ctx.lineTo(el.x + p.x, el.y + p.y);
-  });
-  ctx.stroke;
+  // Draw the shaft
+  const points: [number, number][] = el.points.map((p) => [
+    el.x + p.x,
+    el.y + p.y,
+  ]);
+  rc.linearPath(points, options);
+
+  // Draw arrowhead at the end
+  const lastPoint = points[points.length - 1]!;
+  const secondLast = points[points.length - 2]!;
+
+  const angle = Math.atan2(
+    lastPoint[1] - secondLast[1],
+    lastPoint[0] - secondLast[0],
+  );
+
+  const arrowLength = 15;
+  const arrowAngle = Math.PI / 6; // 30 degrees
+
+  const x1 = lastPoint[0] - arrowLength * Math.cos(angle - arrowAngle);
+  const y1 = lastPoint[1] - arrowLength * Math.sin(angle - arrowAngle);
+  const x2 = lastPoint[0] - arrowLength * Math.cos(angle + arrowAngle);
+  const y2 = lastPoint[1] - arrowLength * Math.sin(angle + arrowAngle);
+
+  rc.line(lastPoint[0], lastPoint[1], x1, y1, options);
+  rc.line(lastPoint[0], lastPoint[1], x2, y2, options);
 }
 
 function drawPencil(
@@ -146,6 +185,8 @@ function drawPencil(
   el: Extract<ExcalidrawElement, { type: "pencil" }>,
 ) {
   if (el.points.length < 2) return;
+  ctx.strokeStyle = el.strokeColor;
+  ctx.lineWidth = el.strokeWidth;
   ctx.beginPath();
   ctx.moveTo(el.x + el.points[0].x, el.y + el.points[0].y);
   el.points.slice(1).forEach((p) => {

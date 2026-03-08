@@ -441,12 +441,24 @@ export default function ToolOptionsPanel() {
     dispatch(updateToolOptions({ strokeColor: color }));
   }
 
-  function handleBackgroundChange(color: string){
-    dispatch(updateToolOptions({backgroundColor: color}))
+  function handleBackgroundChange(color: string) {
+    dispatch(updateToolOptions({ backgroundColor: color }));
   }
 
-  function handleEdgeChange(type: "sharp" | "round"){
-    dispatch(updateToolOptions({edgeStyle: type}))
+  function handleEdgeChange(type: "sharp" | "round") {
+    dispatch(updateToolOptions({ edgeStyle: type }));
+  }
+
+  function handleStrokeWidthChange(width: number) {
+    dispatch(updateToolOptions({ strokeWidth: width }));
+  }
+
+  function handleStrokeStyleChange(type: "solid" | "dashed" | "dotted") {
+    dispatch(updateToolOptions({ strokeStyle: type }));
+  }
+
+  function handleRoughnessChange(value: number) {
+    dispatch(updateToolOptions({ roughness: value }));
   }
 
   return (
@@ -513,13 +525,22 @@ export default function ToolOptionsPanel() {
       <div>
         <SectionLabel>Stroke width</SectionLabel>
         <div className="flex items-center gap-[6px]">
-          <OptionButton active={toolOptions.strokeWidth <= 1} title="Thin">
+          <OptionButton
+            active={toolOptions.strokeWidth <= 1}
+            onClick={() => handleStrokeWidthChange(1)}
+            title="Thin"
+          >
             <StrokeWidthBaseIcon />
           </OptionButton>
-          <OptionButton active={toolOptions.strokeWidth === 2} title="Bold">
+          <OptionButton
+            active={toolOptions.strokeWidth === 2}
+            onClick={() => handleStrokeWidthChange(2)}
+            title="Bold"
+          >
             <StrokeWidthBoldIcon />
           </OptionButton>
           <OptionButton
+            onClick={() => handleStrokeWidthChange(3)}
             active={toolOptions.strokeWidth >= 3}
             title="Extra bold"
           >
@@ -533,11 +554,13 @@ export default function ToolOptionsPanel() {
         <div className="flex items-center gap-[6px]">
           <OptionButton
             active={toolOptions.strokeStyle === "solid"}
+            onClick={() => handleStrokeStyleChange("solid")}
             title="Solid"
           >
             <StrokeStyleSolidIcon />
           </OptionButton>
           <OptionButton
+            onClick={() => handleStrokeStyleChange("dashed")}
             active={toolOptions.strokeStyle === "dashed"}
             title="Dashed"
           >
@@ -545,6 +568,7 @@ export default function ToolOptionsPanel() {
           </OptionButton>
           <OptionButton
             active={toolOptions.strokeStyle === "dotted"}
+            onClick={() => handleStrokeStyleChange("dotted")}
             title="Dotted"
           >
             <StrokeStyleDottedIcon />
@@ -555,18 +579,25 @@ export default function ToolOptionsPanel() {
       <div>
         <SectionLabel>Sloppiness</SectionLabel>
         <div className="flex items-center gap-[6px]">
-          <OptionButton active={toolOptions.roughness === 0} title="Architect">
+          <OptionButton
+            active={toolOptions.roughness === 0}
+            onClick={() => handleRoughnessChange(0)}
+            title="Architect"
+          >
             <SloppinessArchitectIcon />
           </OptionButton>
           <OptionButton
-            active={
-              toolOptions.roughness === 1 || toolOptions.roughness === 100
-            }
+            active={toolOptions.roughness === 1}
+            onClick={() => handleRoughnessChange(1)}
             title="Artist"
           >
             <SloppinessArtistIcon />
           </OptionButton>
-          <OptionButton active={toolOptions.roughness === 2} title="Cartoonist">
+          <OptionButton
+            active={toolOptions.roughness === 2}
+            onClick={() => handleRoughnessChange(2)}
+            title="Cartoonist"
+          >
             <SloppinessCartoonistIcon />
           </OptionButton>
         </div>
