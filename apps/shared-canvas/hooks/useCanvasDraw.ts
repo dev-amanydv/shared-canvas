@@ -20,7 +20,7 @@ export function useCanvasDraw(
   const activeTool = useAppSelector(selectActiveTool);
   const toolOptions = useAppSelector(selectToolOptions);
   const elements = useAppSelector(selectVisibleElements);
-  console.log("elements updated: ", elements)
+  console.log("line elements: ", elements.find((el) => el.type === "line"))
   const isDrawing = useRef(false);
   const startX = useRef(0);
   const startY = useRef(0);
@@ -44,7 +44,7 @@ export function useCanvasDraw(
       isDrawing.current = true;
       startX.current = e.clientX;
       startY.current = e.clientY;
-
+      console.log("startX: ", startX.current, " startY: ", startY.current)
       if (activeTool === "rectangle") {
         dispatch(
           pushToHistory({
@@ -152,7 +152,7 @@ export function useCanvasDraw(
           updates: {
             width,
             height,
-            points: [{x: 0, y: 0}, {x: e.clientX, y: e.clientY}]
+            points: [{x: 0, y: 0}, {x: e.clientX - startX.current, y: e.clientY - startY.current}]
           }
         }))
       }
@@ -216,7 +216,7 @@ export function useCanvasDraw(
           updates: {
             width,
             height,
-            points: [{ x: startX.current, y: startY.current }, { x: e.clientX, y: e.clientY}]
+            points: [{ x: 0, y: 0 }, { x: e.clientX - startX.current, y: e.clientY - startY.current}]
           }
         }))
       }

@@ -106,7 +106,7 @@ export function createLineElement(
     strokeColor: options.strokeColor,
     strokeStyle: options.strokeStyle,
     strokeWidth: options.strokeWidth,
-    points: [{ x: startX, y: startY }],
+    points: [{ x: 0, y: 0 }, { x: 0, y: 0 }],
     lastCommittedPoint: null,
     x: startX,
     y: startY,
