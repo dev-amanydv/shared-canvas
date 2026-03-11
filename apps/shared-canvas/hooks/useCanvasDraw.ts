@@ -7,7 +7,7 @@ import { addElement, updateElement } from "@/store/slices/canvasSlice";
 import { pushToHistory } from "@/store/slices/historySlice";
 import { revertToSelect } from "@/store/slices/toolSlice";
 import { useAppDispatch, useAppSelector } from "@/store/store";
-import { createCircleElement, createDiamondElement, createLineElement, createRectangleElement } from "@/utils/elementFactory";
+import { createCircleElement, createDiamondElement, createLineElement, createPencilElement, createRectangleElement } from "@/utils/elementFactory";
 import { renderCanvas } from "@/utils/renderCanvas";
 import { useEffect, useRef } from "react";
 
@@ -20,7 +20,7 @@ export function useCanvasDraw(
   const activeTool = useAppSelector(selectActiveTool);
   const toolOptions = useAppSelector(selectToolOptions);
   const elements = useAppSelector(selectVisibleElements);
-  console.log("line elements: ", elements.find((el) => el.type === "line"))
+  console.log("line elements: ", elements.find((el) => el.type === "rectangle"))
   const isDrawing = useRef(false);
   const startX = useRef(0);
   const startY = useRef(0);
@@ -105,6 +105,17 @@ export function useCanvasDraw(
         dispatch(addElement(newLine));
         activeId.current = newLine.id
       }
+
+      if (activeTool === "pencil"){
+        dispatch(pushToHistory({
+          elements,
+          actionType: "add-pencil"
+        }));
+
+        const newPencil = createPencilElement(e.clientX, e.clientY, toolOptions);
+        dispatch(addElement(newPencil));
+        activeId.current = newPencil.id;
+      }
     };
 
     const onMouseMove = (e: MouseEvent) => {
@@ -153,6 +164,17 @@ export function useCanvasDraw(
             width,
             height,
             points: [{x: 0, y: 0}, {x: e.clientX - startX.current, y: e.clientY - startY.current}]
+          }
+        }))
+      };
+
+      if (activeTool === "pencil"){
+        dispatch(updateElement({
+          id: activeId.current,
+          updates: {
+            width,
+            height,
+            points: []
           }
         }))
       }

@@ -3,6 +3,7 @@ import {
   CircleElement,
   DiamondElement,
   LineElement,
+  PencilElement,
   RectangleElement,
 } from "@/types/canvas";
 import { nanoid } from "@reduxjs/toolkit";
@@ -124,4 +125,36 @@ export function createLineElement(
     createdAt: Date.now(),
     updatedAt: Date.now()
   };
+}
+
+export function createPencilElement(
+  startX: number,
+  startY: number,
+  options: ToolOptions
+): PencilElement {
+  return {
+    id: nanoid(),
+    type: "pencil",
+    strokeColor: options.strokeColor,
+    strokeStyle: options.strokeStyle,
+    strokeWidth: options.strokeWidth,
+    x: startX,
+    y: startY,
+    height: 0,
+    width: 0,
+    fillStyle: options.fillStyle,
+    points: [{x: 0, y: 0 }, {x: 0, y:0 }],
+    pressures: [12],
+    backgroundColor: options.backgroundColor,
+    opacity: options.opacity,
+    isDeleted: false,
+    isLocked: false,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+    roughness: options.roughness,
+    angle: 0,
+    version: 1,
+    seed: Math.floor(Math.random() * 100000),
+    simulatePressure: false
+  }
 }
