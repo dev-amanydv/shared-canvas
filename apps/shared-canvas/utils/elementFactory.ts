@@ -155,6 +155,6 @@ export function createPencilElement(
     angle: 0,
     version: 1,
     seed: Math.floor(Math.random() * 100000),
-    simulatePressure: false
+    simulatePressure: true
   }
 }

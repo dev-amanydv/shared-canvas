@@ -1,6 +1,7 @@
 import { ExcalidrawElement } from "@/types/canvas";
 import rough from "roughjs";
 import type { Options } from "roughjs/bin/core";
+import { getStroke } from "perfect-freehand";
 
 export function renderCanvas(
   ctx: CanvasRenderingContext2D,
@@ -152,14 +153,12 @@ function drawArrow(
 ) {
   if (el.points.length < 2) return;
 
-  // Draw the shaft
   const points: [number, number][] = el.points.map((p) => [
     el.x + p.x,
     el.y + p.y,
   ]);
   rc.linearPath(points, options);
 
-  // Draw arrowhead at the end
   const lastPoint = points[points.length - 1]!;
   const secondLast = points[points.length - 2]!;
 
@@ -169,7 +168,7 @@ function drawArrow(
   );
 
   const arrowLength = 15;
-  const arrowAngle = Math.PI / 6; // 30 degrees
+  const arrowAngle = Math.PI / 6; 
 
   const x1 = lastPoint[0] - arrowLength * Math.cos(angle - arrowAngle);
   const y1 = lastPoint[1] - arrowLength * Math.sin(angle - arrowAngle);
@@ -185,31 +184,38 @@ function drawPencil(
   el: Extract<ExcalidrawElement, { type: "pencil" }>,
 ) {
   if (el.points.length < 2) return;
-  ctx.strokeStyle = el.strokeColor;
-  ctx.lineWidth = el.strokeWidth;
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
 
-  ctx.beginPath();
-  ctx.moveTo(el.x + el.points[0].x, el.y + el.points[0].y);
+  const pointsForFreehand = el.points.map((p) => [el.x + p.x, el.y + p.y]);
 
-  if (el.points.length === 2) {
-    ctx.lineTo(el.x + el.points[1].x, el.y + el.points[1].y);
-  } else {
-    for (let i = 1; i < el.points.length - 1; i++) {
-        const p1 = el.points[i];
-        const p2 = el.points[i + 1];
-        
-        const midPointX = el.x + p1.x + (p2.x - p1.x) / 2;
-        const midPointY = el.y + p1.y + (p2.y - p1.y) / 2;
-        
-        ctx.quadraticCurveTo(el.x + p1.x, el.y + p1.y, midPointX, midPointY);
-    }
-    const lastPoint = el.points[el.points.length - 1];
-    ctx.lineTo(el.x + lastPoint.x, el.y + lastPoint.y);
-  }
+  const stroke = getStroke(pointsForFreehand, {
+    size: el.strokeWidth * 3,
+    thinning: el.simulatePressure ? 0.3 : 0.1,
+    smoothing: 0.5,
+    streamline: 0.5,
+    simulatePressure: el.simulatePressure !== false,
+  });
 
-  ctx.stroke();
+  const pathData = getSvgPathFromStroke(stroke);
+  const path = new Path2D(pathData);
+
+  ctx.fillStyle = el.strokeColor;
+  ctx.fill(path);
+}
+
+function getSvgPathFromStroke(stroke: number[][]) {
+  if (!stroke.length) return "";
+
+  const d = stroke.reduce(
+    (acc, [x0, y0], i, arr) => {
+      const [x1, y1] = arr[(i + 1) % arr.length];
+      acc.push(x0, y0, (x0 + x1) / 2, (y0 + y1) / 2);
+      return acc;
+    },
+    ["M", ...stroke[0], "Q"] as (string | number)[],
+  );
+
+  d.push("Z");
+  return d.join(" ");
 }
 
 function drawText(
