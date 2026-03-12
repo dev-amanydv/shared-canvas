@@ -584,6 +584,7 @@ export default function ToolOptionsPanel() {
     dispatch(updateToolOptions({ fillStyle: style }));
   }
 
+
   return (
     <div
       className="absolute top-[100px] left-[12px] z-30 bg-white border border-[#e2e2e2] rounded-lg p-[14px] flex flex-col gap-[14px] select-none"

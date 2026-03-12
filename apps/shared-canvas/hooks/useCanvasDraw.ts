@@ -7,6 +7,7 @@ import { addElement, updateElement } from "@/store/slices/canvasSlice";
 import { pushToHistory } from "@/store/slices/historySlice";
 import { revertToSelect } from "@/store/slices/toolSlice";
 import { useAppDispatch, useAppSelector } from "@/store/store";
+import { PencilElement } from "@/types/canvas";
 import { createCircleElement, createDiamondElement, createLineElement, createPencilElement, createRectangleElement } from "@/utils/elementFactory";
 import { renderCanvas } from "@/utils/renderCanvas";
 import { useEffect, useRef } from "react";
@@ -18,9 +19,10 @@ export function useCanvasDraw(
 ) {
   const dispatch = useAppDispatch();
   const activeTool = useAppSelector(selectActiveTool);
+  console.log("activeTool: ", activeTool)
   const toolOptions = useAppSelector(selectToolOptions);
   const elements = useAppSelector(selectVisibleElements);
-  console.log("line elements: ", elements.find((el) => el.type === "rectangle"))
+  console.log("pencilElement: ", elements.find((el) => el.type === "pencil"))
   const isDrawing = useRef(false);
   const startX = useRef(0);
   const startY = useRef(0);
@@ -169,14 +171,17 @@ export function useCanvasDraw(
       };
 
       if (activeTool === "pencil"){
-        dispatch(updateElement({
+        const pencilElement = elements.find((el) => el.id === activeId.current && el.type === "pencil") as PencilElement;
+        if (pencilElement){
+          dispatch(updateElement({
           id: activeId.current,
           updates: {
             width,
             height,
-            points: []
+            points: [...pencilElement.points, { x: e.clientX - startX.current, y: e.clientY - startY.current }]
           }
         }))
+        }
       }
     };
 
@@ -241,6 +246,19 @@ export function useCanvasDraw(
             points: [{ x: 0, y: 0 }, { x: e.clientX - startX.current, y: e.clientY - startY.current}]
           }
         }))
+      }
+      if (activeTool === "pencil"){
+        const pencilElement = elements.find((el) => el.id === activeId.current && el.type === "pencil") as PencilElement;
+        if (pencilElement){
+          dispatch(updateElement({
+            id: activeId.current,
+            updates: {
+              width,
+              height,
+              points: [...pencilElement.points, { x: e.clientX - startX.current, y: e.clientY - startY.current }]
+            }
+          }))
+        }
       }
       activeId.current = null;
       dispatch(revertToSelect());

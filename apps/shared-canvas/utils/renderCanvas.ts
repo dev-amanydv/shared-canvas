@@ -187,11 +187,28 @@ function drawPencil(
   if (el.points.length < 2) return;
   ctx.strokeStyle = el.strokeColor;
   ctx.lineWidth = el.strokeWidth;
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+
   ctx.beginPath();
   ctx.moveTo(el.x + el.points[0].x, el.y + el.points[0].y);
-  el.points.slice(1).forEach((p) => {
-    ctx.lineTo(el.x + p.x, el.y + p.y);
-  });
+
+  if (el.points.length === 2) {
+    ctx.lineTo(el.x + el.points[1].x, el.y + el.points[1].y);
+  } else {
+    for (let i = 1; i < el.points.length - 1; i++) {
+        const p1 = el.points[i];
+        const p2 = el.points[i + 1];
+        
+        const midPointX = el.x + p1.x + (p2.x - p1.x) / 2;
+        const midPointY = el.y + p1.y + (p2.y - p1.y) / 2;
+        
+        ctx.quadraticCurveTo(el.x + p1.x, el.y + p1.y, midPointX, midPointY);
+    }
+    const lastPoint = el.points[el.points.length - 1];
+    ctx.lineTo(el.x + lastPoint.x, el.y + lastPoint.y);
+  }
+
   ctx.stroke();
 }
 
