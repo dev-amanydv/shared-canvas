@@ -8,7 +8,7 @@ import { pushToHistory } from "@/store/slices/historySlice";
 import { revertToSelect } from "@/store/slices/toolSlice";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { PencilElement } from "@/types/canvas";
-import { createCircleElement, createDiamondElement, createLineElement, createPencilElement, createRectangleElement } from "@/utils/elementFactory";
+import { createCircleElement, createDiamondElement, createLineElement, createPencilElement, createRectangleElement, createArrowElement } from "@/utils/elementFactory";
 import { renderCanvas } from "@/utils/renderCanvas";
 import { useEffect, useRef } from "react";
 
@@ -108,6 +108,21 @@ export function useCanvasDraw(
         activeId.current = newLine.id
       }
 
+      if (activeTool === "arrow"){
+        dispatch(pushToHistory({
+          elements,
+          actionType: "add-arrow"
+        }));
+
+        const newArrow = createArrowElement(
+          e.clientX,
+          e.clientY,
+          toolOptions
+        );
+        dispatch(addElement(newArrow));
+        activeId.current = newArrow.id
+      }
+
       if (activeTool === "pencil"){
         dispatch(pushToHistory({
           elements,
@@ -160,6 +175,17 @@ export function useCanvasDraw(
         )
       };
       if (activeTool === "line"){
+        dispatch(updateElement({
+          id: activeId.current,
+          updates: {
+            width,
+            height,
+            points: [{x: 0, y: 0}, {x: e.clientX - startX.current, y: e.clientY - startY.current}]
+          }
+        }))
+      };
+
+      if (activeTool === "arrow"){
         dispatch(updateElement({
           id: activeId.current,
           updates: {
@@ -238,6 +264,16 @@ export function useCanvasDraw(
         }))
       }
       if (activeTool === "line"){
+        dispatch(updateElement({
+          id: activeId.current,
+          updates: {
+            width,
+            height,
+            points: [{ x: 0, y: 0 }, { x: e.clientX - startX.current, y: e.clientY - startY.current}]
+          }
+        }))
+      }
+      if (activeTool === "arrow"){
         dispatch(updateElement({
           id: activeId.current,
           updates: {

@@ -1,5 +1,6 @@
 import type { ToolOptions } from "@/store/slices/toolSlice";
 import {
+  ArrowElement,
   CircleElement,
   DiamondElement,
   LineElement,
@@ -156,5 +157,35 @@ export function createPencilElement(
     version: 1,
     seed: Math.floor(Math.random() * 100000),
     simulatePressure: true
+  }
+}
+
+export function createArrowElement (startX: number, startY: number, options: ToolOptions): ArrowElement {
+  return {
+    id: nanoid(),
+    type: "arrow",
+    strokeColor: options.strokeColor,
+    strokeStyle: options.strokeStyle,
+    strokeWidth: options.strokeWidth,
+    backgroundColor: options.backgroundColor,
+    fillStyle: options.fillStyle,
+    opacity: options.opacity,
+    roughness: options.roughness,
+    isDeleted: false,
+    isLocked: false,
+    version: 1,
+    x: startX,
+    y: startY,
+    width: 0,
+    height: 0,
+    angle: 0,
+    points: [],
+    startArrowHead: "arrow",
+    endArrowHead: "none",
+    startBinding: null ,
+    endBinding: null,
+    seed: Math.floor(Math.random() * 100000),
+    updatedAt: Date.now(),
+    createdAt: Date.now()
   }
 }
