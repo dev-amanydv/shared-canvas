@@ -135,6 +135,7 @@ export function useCanvasDraw(
       }
 
       if (activeTool === "text"){
+        const clickedText = findTex
         dispatch(pushToHistory({
           elements,
           actionType: "add-text"
