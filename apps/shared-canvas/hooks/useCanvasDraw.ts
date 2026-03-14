@@ -8,7 +8,7 @@ import { pushToHistory } from "@/store/slices/historySlice";
 import { revertToSelect } from "@/store/slices/toolSlice";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { PencilElement } from "@/types/canvas";
-import { createCircleElement, createDiamondElement, createLineElement, createPencilElement, createRectangleElement, createArrowElement } from "@/utils/elementFactory";
+import { createCircleElement, createDiamondElement, createLineElement, createPencilElement, createRectangleElement, createArrowElement, createTextElement } from "@/utils/elementFactory";
 import { renderCanvas } from "@/utils/renderCanvas";
 import { useEffect, useRef } from "react";
 
@@ -22,7 +22,7 @@ export function useCanvasDraw(
   console.log("activeTool: ", activeTool)
   const toolOptions = useAppSelector(selectToolOptions);
   const elements = useAppSelector(selectVisibleElements);
-  console.log("pencilElement: ", elements.find((el) => el.type === "pencil"))
+  console.log("textElement: ", elements.find((el) => el.type === "text"))
   const isDrawing = useRef(false);
   const startX = useRef(0);
   const startY = useRef(0);
@@ -132,6 +132,18 @@ export function useCanvasDraw(
         const newPencil = createPencilElement(e.clientX, e.clientY, toolOptions);
         dispatch(addElement(newPencil));
         activeId.current = newPencil.id;
+      }
+
+      if (activeTool === "text"){
+        dispatch(pushToHistory({
+          elements,
+          actionType: "add-text"
+        }));
+
+        const newText = createTextElement(e.clientX, e.clientY, toolOptions);
+
+        dispatch(addElement(newText));
+        dispatch(revertToSelect())
       }
     };
 

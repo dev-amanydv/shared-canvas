@@ -6,6 +6,7 @@ import {
   LineElement,
   PencilElement,
   RectangleElement,
+  TextElement,
 } from "@/types/canvas";
 import { nanoid } from "@reduxjs/toolkit";
 
@@ -185,6 +186,45 @@ export function createArrowElement (startX: number, startY: number, options: Too
     startBinding: null ,
     endBinding: null,
     seed: Math.floor(Math.random() * 100000),
+    updatedAt: Date.now(),
+    createdAt: Date.now()
+  }
+}
+
+export function createTextElement (
+  startX: number,
+  startY: number,
+  options: ToolOptions
+): TextElement {
+  return {
+    id: nanoid(),
+    strokeColor: options.strokeColor,
+    strokeWidth: options.strokeWidth,
+    fillStyle: options.fillStyle,
+    strokeStyle: options.strokeStyle,
+    angle: 0,
+    roughness: options.roughness,
+    x: startX,
+    y: startY,
+    width: 10,
+    fontWeight: "normal",
+    autoResize: true, 
+    originalText: "",
+    height: options.fontSize * 1.5,
+    opacity: options.opacity,
+    backgroundColor: options.backgroundColor,
+    type: "text",
+    fontFamily: options.fontFamily,
+    fontSize: options.fontSize,
+    text: "",
+    textAlign: options.textAlign,
+    verticalAlign: "top",
+    lineHeight: 1.5,
+    isEditing: true,
+    isDeleted: false,
+    isLocked: false,
+    seed: Math.floor(Math.random() * 100000),
+    version: 1,
     updatedAt: Date.now(),
     createdAt: Date.now()
   }

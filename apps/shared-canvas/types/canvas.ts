@@ -92,8 +92,11 @@ export interface TextElement extends BaseElement {
   fontFamily: FontFamily;
   textAlign: TextAlign;
   verticalAlign: "top" | "middle";
+  fontWeight: "normal" | "bold";
   lineHeight: number;
   isEditing: boolean;
+  autoResize: boolean;
+  originalText: string
 }
 
 export interface ImageElement extends BaseElement {
