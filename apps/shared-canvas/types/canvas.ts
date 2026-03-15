@@ -15,7 +15,7 @@ export type StrokeStyle = "solid" | "dashed" | "dotted";
 
 export type FillStyle = "solid" | "hachure" | "cross-hatch" | "none";
 
-export type FontFamily = "hand-drawn" | "normal" | "monospace";
+export type FontFamily = "hand-drawn" | "normal" | "monospace" | "comic-sans";
 
 export type TextAlign = "left" | "center" | "right";
 

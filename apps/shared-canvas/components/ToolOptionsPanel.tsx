@@ -517,6 +517,62 @@ function FillSolidIcon() {
   );
 }
 
+function FontFamilyHandDrawnIcon() {
+  return (
+    <svg aria-hidden="true" focusable="false" role="img" viewBox="0 0 20 20" className="size-[16px]" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m13.333 4.167 2.5 2.5M14.583 2.917a1.768 1.768 0 0 1 2.5 2.5L6.667 15.833 2.5 17.5l1.667-4.167L14.583 2.917Z" strokeWidth="1.25" />
+    </svg>
+  );
+}
+
+function FontFamilyNormalIcon() {
+  return (
+    <svg aria-hidden="true" focusable="false" role="img" viewBox="0 0 20 20" className="size-[16px]" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M5.833 16.667v-8.334c0-2.3 1.867-4.166 4.167-4.166s4.167 1.866 4.167 4.166v8.334M5.833 11.667h8.334" strokeWidth="1.25" />
+    </svg>
+  );
+}
+
+function FontFamilyCodeIcon() {
+  return (
+    <svg aria-hidden="true" focusable="false" role="img" viewBox="0 0 20 20" className="size-[16px]" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6.667 5.833 2.5 10l4.167 4.167M13.333 5.833 17.5 10l-4.167 4.167M11.667 3.333l-3.334 13.334" strokeWidth="1.25" />
+    </svg>
+  );
+}
+
+function FontFamilySerifIcon() {
+  return (
+    <svg aria-hidden="true" focusable="false" role="img" viewBox="0 0 20 20" className="size-[16px]" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4.167 16.667h3.333M12.5 16.667h3.333M8.333 3.333h3.334M10 3.333l-4.167 13.334M10 3.333l4.167 13.334M7.917 11.667h4.166" strokeWidth="1.25" />
+    </svg>
+  );
+}
+
+function TextAlignLeftIcon() {
+  return (
+    <svg aria-hidden="true" focusable="false" role="img" viewBox="0 0 20 20" className="size-[16px]" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3.333 5.833h13.334M3.333 10h8.334M3.333 14.167h13.334" strokeWidth="1.25" />
+    </svg>
+  );
+}
+
+function TextAlignCenterIcon() {
+  return (
+    <svg aria-hidden="true" focusable="false" role="img" viewBox="0 0 20 20" className="size-[16px]" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3.333 5.833h13.334M5.833 10h8.334M3.333 14.167h13.334" strokeWidth="1.25" />
+    </svg>
+  );
+}
+
+function TextAlignRightIcon() {
+  return (
+    <svg aria-hidden="true" focusable="false" role="img" viewBox="0 0 20 20" className="size-[16px]" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M3.333 5.833h13.334M8.333 10h8.334M3.333 14.167h13.334" strokeWidth="1.25" />
+    </svg>
+  );
+}
+
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <div className="text-[11.5px] font-medium text-[#868e96] mb-[6px] select-none">
@@ -554,7 +610,10 @@ export default function ToolOptionsPanel() {
   const toolOptions = useAppSelector(selectToolOptions);
   const dispatch = useAppDispatch();
 
-  if (!SHAPE_TOOLS.includes(activeTool)) return null;
+  const isShapeTool = SHAPE_TOOLS.includes(activeTool);
+  const isTextTool = activeTool === "text";
+
+  if (!isShapeTool && !isTextTool) return null;
 
   function handleStrokeChange(color: string) {
     dispatch(updateToolOptions({ strokeColor: color }));
@@ -582,6 +641,18 @@ export default function ToolOptionsPanel() {
 
   function handleFillStyleChange(style: "hachure" | "cross-hatch" | "solid") {
     dispatch(updateToolOptions({ fillStyle: style }));
+  }
+
+  function handleFontSizeChange(size: number) {
+    dispatch(updateToolOptions({ fontSize: size }));
+  }
+
+  function handleFontFamilyChange(family: "hand-drawn" | "normal" | "monospace" | "comic-sans") {
+    dispatch(updateToolOptions({ fontFamily: family }));
+  }
+
+  function handleTextAlignChange(align: "left" | "center" | "right") {
+    dispatch(updateToolOptions({ textAlign: align }));
   }
 
 
@@ -622,31 +693,33 @@ export default function ToolOptionsPanel() {
         </div>
       </div>
 
-      <div>
-        <SectionLabel>Background</SectionLabel>
-        <div className="flex items-center gap-[6px]">
-          {BG_COLORS.map(({ color, label }) => (
-            <button
-              key={color}
-              title={label}
-              type="button"
-              onClick={() => handleBackgroundChange(color)}
-              className={`h-[22px] w-[22px] rounded-[4px] cursor-pointer transition-all duration-100
-                ${toolOptions.backgroundColor === color ? "ring-[1.5px] ring-[#6965db] ring-offset-1" : "hover:scale-105"}`}
-              style={{
-                backgroundColor: color === "transparent" ? "white" : color,
-                borderColor: "#d4d4d4",
-              }}
-            />
-          ))}
-          <div className="h-5 w-px bg-[#F1F0FE]" />
-          <div className="ml-auto cursor-pointer">
-            <CrossHatchPattern />
+      {isShapeTool && (
+        <div>
+          <SectionLabel>Background</SectionLabel>
+          <div className="flex items-center gap-[6px]">
+            {BG_COLORS.map(({ color, label }) => (
+              <button
+                key={color}
+                title={label}
+                type="button"
+                onClick={() => handleBackgroundChange(color)}
+                className={`h-[22px] w-[22px] rounded-[4px] cursor-pointer transition-all duration-100
+                  ${toolOptions.backgroundColor === color ? "ring-[1.5px] ring-[#6965db] ring-offset-1" : "hover:scale-105"}`}
+                style={{
+                  backgroundColor: color === "transparent" ? "white" : color,
+                  borderColor: "#d4d4d4",
+                }}
+              />
+            ))}
+            <div className="h-5 w-px bg-[#F1F0FE]" />
+            <div className="ml-auto cursor-pointer">
+              <CrossHatchPattern />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
-      {toolOptions.backgroundColor !== "transparent" && (
+      {isShapeTool && toolOptions.backgroundColor !== "transparent" && (
         <div>
           <SectionLabel>Fill</SectionLabel>
           <div className="flex items-center gap-[6px]">
@@ -675,8 +748,9 @@ export default function ToolOptionsPanel() {
         </div>
       )}
 
-      <div>
-        <SectionLabel>Stroke width</SectionLabel>
+      {isShapeTool && (
+        <div>
+          <SectionLabel>Stroke width</SectionLabel>
         <div className="flex items-center gap-[6px]">
           <OptionButton
             active={toolOptions.strokeWidth <= 1}
@@ -700,10 +774,12 @@ export default function ToolOptionsPanel() {
             <StrokeWidthExtraBoldIcon />
           </OptionButton>
         </div>
-      </div>
+        </div>
+      )}
 
-      <div>
-        <SectionLabel>Stroke style</SectionLabel>
+      {isShapeTool && (
+        <div>
+          <SectionLabel>Stroke style</SectionLabel>
         <div className="flex items-center gap-[6px]">
           <OptionButton
             active={toolOptions.strokeStyle === "solid"}
@@ -727,10 +803,12 @@ export default function ToolOptionsPanel() {
             <StrokeStyleDottedIcon />
           </OptionButton>
         </div>
-      </div>
+        </div>
+      )}
 
-      <div>
-        <SectionLabel>Sloppiness</SectionLabel>
+      {isShapeTool && (
+        <div>
+          <SectionLabel>Sloppiness</SectionLabel>
         <div className="flex items-center gap-[6px]">
           <OptionButton
             active={toolOptions.roughness === 0}
@@ -754,10 +832,12 @@ export default function ToolOptionsPanel() {
             <SloppinessCartoonistIcon />
           </OptionButton>
         </div>
-      </div>
+        </div>
+      )}
 
-      <div>
-        <SectionLabel>Edges</SectionLabel>
+      {isShapeTool && (
+        <div>
+          <SectionLabel>Edges</SectionLabel>
         <div className="flex items-center gap-[6px]">
           <OptionButton
             active={toolOptions.edgeStyle === "sharp"}
@@ -774,7 +854,110 @@ export default function ToolOptionsPanel() {
             <EdgeRoundIcon />
           </OptionButton>
         </div>
-      </div>
+        </div>
+      )}
+
+      {isTextTool && (
+        <div>
+          <SectionLabel>Font family</SectionLabel>
+          <div className="flex items-center gap-[6px]">
+            <OptionButton
+              active={toolOptions.fontFamily === "hand-drawn"}
+              onClick={() => handleFontFamilyChange("hand-drawn")}
+              title="Hand-drawn"
+            >
+              <FontFamilyHandDrawnIcon />
+            </OptionButton>
+            <OptionButton
+              active={toolOptions.fontFamily === "normal"}
+              onClick={() => handleFontFamilyChange("normal")}
+              title="Normal"
+            >
+              <FontFamilyNormalIcon />
+            </OptionButton>
+            <OptionButton
+              active={toolOptions.fontFamily === "monospace"}
+              onClick={() => handleFontFamilyChange("monospace")}
+              title="Code"
+            >
+              <FontFamilyCodeIcon />
+            </OptionButton>
+            <div className="h-5 w-px bg-[#F1F0FE]" />
+            <OptionButton
+              active={toolOptions.fontFamily === "comic-sans"}
+              onClick={() => handleFontFamilyChange("comic-sans")}
+              title="Comic Sans"
+            >
+              <FontFamilySerifIcon />
+            </OptionButton>
+          </div>
+        </div>
+      )}
+
+      {isTextTool && (
+        <div>
+          <SectionLabel>Font size</SectionLabel>
+          <div className="flex items-center gap-[6px]">
+            <OptionButton
+              active={toolOptions.fontSize === 16}
+              onClick={() => handleFontSizeChange(16)}
+              title="Small"
+            >
+              S
+            </OptionButton>
+            <OptionButton
+              active={toolOptions.fontSize === 20}
+              onClick={() => handleFontSizeChange(20)}
+              title="Medium"
+            >
+              M
+            </OptionButton>
+            <OptionButton
+              active={toolOptions.fontSize === 28}
+              onClick={() => handleFontSizeChange(28)}
+              title="Large"
+            >
+              L
+            </OptionButton>
+            <OptionButton
+              active={toolOptions.fontSize === 36}
+              onClick={() => handleFontSizeChange(36)}
+              title="Extra Large"
+            >
+              XL
+            </OptionButton>
+          </div>
+        </div>
+      )}
+
+      {isTextTool && (
+        <div>
+          <SectionLabel>Text align</SectionLabel>
+          <div className="flex items-center gap-[6px]">
+            <OptionButton
+              active={toolOptions.textAlign === "left"}
+              onClick={() => handleTextAlignChange("left")}
+              title="Left"
+            >
+              <TextAlignLeftIcon />
+            </OptionButton>
+            <OptionButton
+              active={toolOptions.textAlign === "center"}
+              onClick={() => handleTextAlignChange("center")}
+              title="Center"
+            >
+              <TextAlignCenterIcon />
+            </OptionButton>
+            <OptionButton
+              active={toolOptions.textAlign === "right"}
+              onClick={() => handleTextAlignChange("right")}
+              title="Right"
+            >
+              <TextAlignRightIcon />
+            </OptionButton>
+          </div>
+        </div>
+      )}
 
       <div>
         <SectionLabel>Opacity</SectionLabel>
