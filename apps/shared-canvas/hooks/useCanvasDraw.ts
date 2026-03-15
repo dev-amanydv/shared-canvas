@@ -5,11 +5,14 @@ import {
 } from "@/store/selectors";
 import { addElement, updateElement } from "@/store/slices/canvasSlice";
 import { pushToHistory } from "@/store/slices/historySlice";
+import { setEditingElement } from "@/store/slices/selectionSlice";
 import { revertToSelect } from "@/store/slices/toolSlice";
-import { useAppDispatch, useAppSelector } from "@/store/store";
-import { PencilElement } from "@/types/canvas";
+import { store, useAppDispatch, useAppSelector } from "@/store/store";
+import { ExcalidrawElement, PencilElement, TextElement } from "@/types/canvas";
 import { createCircleElement, createDiamondElement, createLineElement, createPencilElement, createRectangleElement, createArrowElement, createTextElement } from "@/utils/elementFactory";
+import { findElementAtPoint } from "@/utils/hitTest";
 import { renderCanvas } from "@/utils/renderCanvas";
+import { mountTextArea } from "@/utils/textAreaManager";
 import { useEffect, useRef } from "react";
 
 export function useCanvasDraw(
@@ -135,7 +138,14 @@ export function useCanvasDraw(
       }
 
       if (activeTool === "text"){
-        const clickedText = findTex
+        const clickedText = findElementAtPoint(elements
+          , e.clientX, e.clientY
+        );
+
+        if (clickedText && clickedText.type === "text"){
+          openTextEditor(clickedText)
+        };
+
         dispatch(pushToHistory({
           elements,
           actionType: "add-text"
@@ -144,7 +154,9 @@ export function useCanvasDraw(
         const newText = createTextElement(e.clientX, e.clientY, toolOptions);
 
         dispatch(addElement(newText));
-        dispatch(revertToSelect())
+        dispatch(setEditingElement(newText.id));
+        openTextEditor(newText);
+        return;
       }
     };
 
@@ -315,6 +327,31 @@ export function useCanvasDraw(
     canvas.addEventListener("mousedown", onMouseDown);
     canvas.addEventListener("mousemove", onMouseMove);
     canvas.addEventListener("mouseup", onMouseUp);
+    function openTextEditor(element: TextElement) {
+  const { zoom, scrollX, scrollY } = store.getState().ui;
+  
+  mountTextArea({
+      element,
+      zoom,
+      scrollX,
+      scrollY,
+      onInput: (text, width, height) => {
+        dispatch(updateElement({
+        id: element.id,
+        updates: {
+          text,
+          originalText: text,
+          width,
+          height,
+          isEditing: true,
+        },
+      }));
+      },
+      onCommit: (text, width, height) => {
+
+      }
+  })
+}
 
     return () => {
       canvas.removeEventListener("mousedown", onMouseDown);
