@@ -3,6 +3,13 @@ import rough from "roughjs";
 import type { Options } from "roughjs/bin/core";
 import { getStroke } from "perfect-freehand";
 
+
+const FONT_FAMILY_MAP: Record<string, string> = {
+  "hand-drawn": "Caveat, cursive",
+  "normal":     "Inter, sans-serif",
+  "monospace":  "'Courier New', monospace",
+};
+
 export function renderCanvas(
   ctx: CanvasRenderingContext2D,
   canvas: HTMLCanvasElement,
@@ -222,8 +229,23 @@ function drawText(
   ctx: CanvasRenderingContext2D,
   el: Extract<ExcalidrawElement, { type: "text" }>,
 ) {
+  if (el.isDeleted) return;
+  if (el.isEditing) return;
+  if (!el.text.trim()) return;
+
   ctx.font = `${el.fontSize}px ${el.fontFamily}`;
   ctx.fillStyle = el.strokeColor;
   ctx.textAlign = el.textAlign;
-  ctx.fillText(el.text, el.x, el.y + el.fontSize);
+  ctx.textBaseline= "top";
+
+  let textX = el.x;
+  if (el.textAlign === "center") textX = el.x + el.width / 2;
+  if (el.textAlign === "right") textX = el.x + el.width;
+
+  const lineHeight = el.fontSize * el.lineHeight;
+  const lines = el.text.split("\n");
+
+  lines.forEach((line, i) => {
+    ctx.fillText(line, textX, el.y + i * lineHeight)
+  })
 }

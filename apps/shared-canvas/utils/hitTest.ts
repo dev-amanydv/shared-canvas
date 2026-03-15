@@ -1,7 +1,7 @@
 import { ExcalidrawElement } from "@/types/canvas";
 
 export function findElementAtPoint(elements: ExcalidrawElement[], x: number, y: number) {
-    for (let i = elements.length; i >= 0; i--){
+    for (let i = elements.length - 1; i >= 0; i--){
         const el = elements[i];
 
         if (el.isDeleted) continue;
