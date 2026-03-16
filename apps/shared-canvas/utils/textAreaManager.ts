@@ -76,7 +76,13 @@ export function mountTextArea({
 
     textarea.addEventListener("input", autoResize);
 
+    let isCommitting = false;
     const commit = () => {
+        if (isCommitting) return;
+        isCommitting = true;
+
+        textarea.removeEventListener("blur", commit);
+
         textarea.style.height = "auto";
         textarea.style.width = "auto";
 
@@ -111,8 +117,11 @@ export function mountTextArea({
 export function unmountTextArea(elementId: string) {
   const textarea = document.getElementById(`text-editor-${elementId}`);
   if (textarea) {
-    textarea.removeEventListener("blur", () => {});
-    textarea.remove();
+    if (textarea.parentNode) {
+      textarea.parentNode.removeChild(textarea);
+    } else {
+      textarea.remove();
+    }
   }
 };
 

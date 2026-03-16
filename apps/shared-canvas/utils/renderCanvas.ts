@@ -229,11 +229,12 @@ function drawText(
   ctx: CanvasRenderingContext2D,
   el: Extract<ExcalidrawElement, { type: "text" }>,
 ) {
+  console.log("text: ", el)
   if (el.isDeleted) return;
   if (el.isEditing) return;
   if (!el.text.trim()) return;
 
-  ctx.font = `${el.fontSize}px ${el.fontFamily}`;
+  ctx.font = `${el.fontSize}px ${FONT_FAMILY_MAP[el.fontFamily]}`;
   ctx.fillStyle = el.strokeColor;
   ctx.textAlign = el.textAlign;
   ctx.textBaseline= "top";

@@ -43,7 +43,7 @@ const defaultOptions: ToolOptions = {
   roughness: 1,
   edgeStyle: "round",
   fontSize: 20,
-  fontFamily: "hand-drawn",
+  fontFamily: "normal",
   textAlign: "left",
   startArrowHead: "none",
   endArrorHead: "arrow",
