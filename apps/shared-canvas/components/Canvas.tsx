@@ -9,6 +9,7 @@ import axios from "axios";
 import { HTTP_BACKEND } from "@/config";
 import { addElement, loadElements } from "@/store/slices/canvasSlice";
 import { useCanvasDraw } from "@/hooks/useCanvasDraw";
+import ExcalidrawMenu from "./MenuOptions";
 
 const CURSOR_MAP: Record<string, string> = {
   select: "default",
@@ -60,9 +61,12 @@ export default function Canvas({
   useCanvasDraw(canvasRef, socket, roomId);
 
   return (
-    <div className="w-full h-full">
+    <div className="relative w-screen h-screen">
       <div className="flex justify-center w-full">
         <Nav />
+      </div>
+      <div className="absolute top-11 left-3 z-50">
+        <ExcalidrawMenu />
       </div>
       <ToolOptionsPanel />
       <canvas
