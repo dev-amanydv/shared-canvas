@@ -38,15 +38,19 @@ export default function Canvas({
 
   useEffect(() => {
     const loadExisting = async () => {
-      const res = await axios.get(`${HTTP_BACKEND}/chats/${roomId}`);
-      const messages = res.data.data.chats;
+      // const res = await axios.get(`${HTTP_BACKEND}/chats/${roomId}`);
+      // const messages = res.data.data.chats;
 
-      const elements = messages.map((x: { message: string }) =>
-        JSON.parse(x.message),
-      );
-      dispatch(loadElements(elements));
+      // const elements = messages.map((x: { message: string }) =>
+      //   JSON.parse(x.message),
+      // );
+      const rawElements = localStorage.getItem("canvas");
+      if (!rawElements) return;
+      const elements = JSON.parse(rawElements)
+      console.log(elements)
+      dispatch(loadElements({ elements, files: {} }));
     };
-    // loadExisting();
+    loadExisting();
   }, [roomId, dispatch]);
 
   useEffect(() => {
@@ -74,11 +78,13 @@ export default function Canvas({
       </div>
       <ToolOptionsPanel />
       <canvas
+        id="canvas"
         width={window.innerWidth}
         height={window.innerHeight}
         style={{
           cursor: CURSOR_MAP[activeTool] ?? "crosshair",
           imageRendering: "pixelated",
+          backgroundColor: "white"
         }}
         ref={canvasRef}
         className="absolute inset-0 bg-white"

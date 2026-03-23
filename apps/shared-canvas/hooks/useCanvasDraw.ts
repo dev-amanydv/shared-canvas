@@ -41,6 +41,14 @@ export function useCanvasDraw(
   const startX = useRef(0);
   const startY = useRef(0);
   const activeId = useRef<string | null>(null);
+  const hasLoadedInitialData = useRef(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      hasLoadedInitialData.current = true;
+    }, 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -48,6 +56,10 @@ export function useCanvasDraw(
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     renderCanvas(ctx, canvas, elements);
+
+    if (hasLoadedInitialData.current) {
+      localStorage.setItem("canvas", JSON.stringify(elements))
+    }
   }, [elements, canvasRef]);
 
   useEffect(() => {

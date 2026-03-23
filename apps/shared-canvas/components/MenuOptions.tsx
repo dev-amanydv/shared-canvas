@@ -202,6 +202,13 @@ export default function ExcalidrawMenu() {
     }
   };
 
+  const handleCanvasBackground = (color: string) => {
+    const canvas = window.document.getElementById("canvas");
+    if (!canvas) return;
+    canvas.style.backgroundColor = color
+    console.log("canvas: ", canvas)
+  }
+
   const handleTheme = (t: ThemeType) => {
     dispatch(setTheme(t));
   };
@@ -302,7 +309,10 @@ export default function ExcalidrawMenu() {
                   {CANVAS_BG_COLORS.map((bg, i) => (
                     <button
                       key={i}
-                      onClick={() => setSelectedBg(i)}
+                      onClick={() => {
+                        setSelectedBg(i);
+                        handleCanvasBackground(bg.color)
+                      }}
                       className={`
                         w-7 h-7 rounded-md transition-all
                         ${selectedBg === i
