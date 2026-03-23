@@ -10,6 +10,7 @@ import { HTTP_BACKEND } from "@/config";
 import { addElement, loadElements } from "@/store/slices/canvasSlice";
 import { useCanvasDraw } from "@/hooks/useCanvasDraw";
 import ExcalidrawMenu from "./MenuOptions";
+import ShareOption from "./ShareOptions";
 
 const CURSOR_MAP: Record<string, string> = {
   select: "default",
@@ -65,8 +66,11 @@ export default function Canvas({
       <div className="flex justify-center w-full">
         <Nav />
       </div>
-      <div className="absolute top-11 left-3 z-50">
+      <div className="absolute top-11 left-3 z-20">
         <ExcalidrawMenu />
+      </div>
+      <div className="h-full w-full">
+        <ShareOption />
       </div>
       <ToolOptionsPanel />
       <canvas
