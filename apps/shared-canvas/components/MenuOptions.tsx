@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/store/store";
 import { setTheme } from "@/store/slices/uiSlice";
 import { clearCanvas } from "@/store/slices/canvasSlice";
+import { useRouter } from "next/navigation";
 
 const Icons = {
   Hamburger: () => (
@@ -155,9 +156,10 @@ interface MenuItemProps {
   bold?: boolean;
   chevron?: boolean;
   onClick?: () => void;
+  inDev?: boolean
 }
 
-function MenuItem({ icon, label, shortcut, purple, bold, chevron, onClick }: MenuItemProps) {
+function MenuItem({ icon, label, shortcut, purple, bold, chevron, onClick, inDev }: MenuItemProps) {
   return (
     <button
       onClick={onClick}
@@ -171,7 +173,7 @@ function MenuItem({ icon, label, shortcut, purple, bold, chevron, onClick }: Men
         {icon}
       </span>
       <span className={`flex-1 text-left ${bold ? "font-medium" : "font-normal"}`}>
-        {label}
+        {label} {inDev && <span className="text-xs text-neutral-500 bg-neutral-100 px-1 rounded border border-neutral-300">soon</span>}
       </span>
       {shortcut && (
         <span className={`text-xs font-mono tracking-tight ${purple ? "text-[#6965db]/80" : "text-gray-400 dark:text-gray-500"}`}>
@@ -191,7 +193,7 @@ function MenuItem({ icon, label, shortcut, purple, bold, chevron, onClick }: Men
 export default function ExcalidrawMenu() {
   const dispatch = useAppDispatch();
   const currentTheme = useAppSelector((s) => s.ui.theme);
-
+  const router = useRouter()
   const [open, setOpen] = useState(false);
   const [selectedBg, setSelectedBg] = useState(0);
 
@@ -230,45 +232,44 @@ export default function ExcalidrawMenu() {
           <div className="absolute top-12 left-0 w-[300px] bg-white dark:bg-gray-900 border border-black/10 dark:border-white/10 rounded-xl z-50 shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-1 duration-100">
 
             <div className="py-1.5">
-              <MenuItem icon={<Icons.Folder />}  label="Open"               shortcut="Cmd+O" />
+              <MenuItem icon={<Icons.Folder />}  label="Open"         inDev={true}      shortcut="Cmd+O" />
               <MenuItem icon={<Icons.Save />}    label="Save to..." />
-              <MenuItem icon={<Icons.Export />}  label="Export image..."    shortcut="Cmd+Shift+E" />
+              <MenuItem icon={<Icons.Export />}  label="Export image..."     shortcut="Cmd+Shift+E" />
               <MenuItem icon={<Icons.Users />}   label="Live collaboration..." />
             </div>
 
             <Divider />
 
             <div className="py-1.5">
-              <MenuItem icon={<Icons.Bolt />}   label="Command palette" shortcut="Cmd+/" purple bold />
-              <MenuItem icon={<Icons.Search />} label="Find on canvas"  shortcut="Cmd+F" />
+              <MenuItem icon={<Icons.Bolt />}   label="Command palette" inDev={true} shortcut="Cmd+/" purple bold />
+              <MenuItem icon={<Icons.Search />} label="Find on canvas" inDev={true}  shortcut="Cmd+F" />
             </div>
 
             <Divider />
 
             <div className="py-1.5">
-              <MenuItem icon={<Icons.Help />}  label="Help"             shortcut="?" />
+              <MenuItem icon={<Icons.Help />}  label="Help"             shortcut="?" inDev={true}/>
               <MenuItem icon={<Icons.Trash />} label="Reset the canvas" onClick={handleClearCanvas} />
             </div>
 
             <Divider />
 
             <div className="py-1.5">
-              <MenuItem icon={<Icons.Excalidraw />} label="Excalidraw+" />
-              <MenuItem icon={<Icons.GitHub />}     label="GitHub" />
-              <MenuItem icon={<Icons.Twitter />}    label="Follow us" />
-              <MenuItem icon={<Icons.Discord />}    label="Discord chat" />
+              <MenuItem icon={<Icons.Excalidraw />} onClick={() => router.push('/')} label="Know more!" />
+              <MenuItem icon={<Icons.GitHub />} onClick={() => window.open("https://github.com/dev-amanydv/shared-canvas", "_blank", "noopener,noreferrer")}     label="GitHub" />
+              <MenuItem icon={<Icons.Twitter />} onClick={() => window.open("https://x.com/amandoestwt", "_blank", "noopener,noreferrer")}    label="Follow us" />
             </div>
 
             <Divider />
 
             <div className="py-1.5">
-              <MenuItem icon={<Icons.SignUp />} label="Sign up" purple bold />
+              <MenuItem icon={<Icons.SignUp />} label="Sign up" purple bold inDev={true} />
             </div>
 
             <Divider />
 
             <div className="py-1.5">
-              <MenuItem icon={<Icons.Sliders />} label="Preferences" chevron />
+              <MenuItem icon={<Icons.Sliders />} label="Preferences" chevron inDev={true} />
 
               <div className="flex items-center px-3.5 py-1.5 text-sm text-gray-800 dark:text-gray-200">
                 <span className="flex-1">Theme</span>
