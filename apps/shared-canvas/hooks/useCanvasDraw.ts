@@ -6,12 +6,24 @@ import {
   selectToolOptions,
   selectVisibleElements,
 } from "@/store/selectors";
-import { addElement, deleteElement, updateElement } from "@/store/slices/canvasSlice";
+import {
+  addElement,
+  deleteElement,
+  updateElement,
+} from "@/store/slices/canvasSlice";
 import { pushToHistory } from "@/store/slices/historySlice";
-import { selectElement, selectElements, setBoundingBox, setEditingElement } from "@/store/slices/selectionSlice";
+import {
+  addToSelection,
+  clearSelection,
+  removeFromSelection,
+  selectElement,
+  selectElements,
+  setBoundingBox,
+  setEditingElement,
+} from "@/store/slices/selectionSlice";
 import { revertToSelect } from "@/store/slices/toolSlice";
 import { store, useAppDispatch, useAppSelector } from "@/store/store";
-import { ExcalidrawElement, PencilElement, TextElement } from "@/types/canvas";
+import { BoundingBox, ExcalidrawElement, PencilElement, TextElement } from "@/types/canvas";
 import {
   createCircleElement,
   createDiamondElement,
@@ -25,7 +37,30 @@ import { findElementAtPoint } from "@/utils/hitTest";
 import { renderCanvas, renderSelectionHighlight } from "@/utils/renderCanvas";
 import { mountTextArea } from "@/utils/textAreaManager";
 import { useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
+
+function calculateCombinedBoundingBox (elements: ExcalidrawElement[]): BoundingBox | null{
+  if (elements.length === 0) return null;
+
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  elements.forEach((el) => {
+    minX = Math.min(Infinity, el.x);
+    minY = Math.min(Infinity, el.y);
+    maxX = Math.max(-Infinity, el.x + el.width);
+    maxY = Math.max(-Infinity, el.y + el.height)
+  })
+
+  return {
+    x: minX,
+    y: minY,
+    height: maxY - minY,
+    width: maxX - minX,
+    angle: 0
+  }
+}
 
 export function useCanvasDraw(
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
@@ -63,11 +98,11 @@ export function useCanvasDraw(
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     renderCanvas(ctx, canvas, elements);
-    renderSelectionHighlight(ctx, boundingBox, selectedIds)
+    renderSelectionHighlight(ctx, boundingBox, selectedIds);
     if (hasLoadedInitialData.current) {
-      localStorage.setItem("canvas", JSON.stringify(elements))
+      localStorage.setItem("canvas", JSON.stringify(elements));
     }
-  }, [elements, canvasRef]);
+  }, [elements, canvasRef, boundingBox, selectedIds]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -75,7 +110,11 @@ export function useCanvasDraw(
     const ctx = canvas.getContext("2x");
 
     const onMouseDown = (e: MouseEvent) => {
-      if (activeTool === "hand" || activeTool === "select") return;
+      if (activeTool === "hand") return;
+      if (activeTool === "select"){
+        handleSelectionClick(e);
+        return;
+      }
       isDrawing.current = true;
       startX.current = e.clientX;
       startY.current = e.clientY;
@@ -416,18 +455,22 @@ export function useCanvasDraw(
 
       if (activeId.current) {
         const allElements = store.getState().canvas.elements;
-        const drawnElement = allElements.find((el) => el.id === activeId.current);
+        const drawnElement = allElements.find(
+          (el) => el.id === activeId.current,
+        );
 
         if (drawnElement) {
           dispatch(selectElement(drawnElement.id));
 
-          dispatch(setBoundingBox({
-            x: drawnElement.x,
-            y: drawnElement.y,
-            width: drawnElement.width,
-            height: drawnElement.height,
-            angle: drawnElement.angle
-          }))
+          dispatch(
+            setBoundingBox({
+              x: drawnElement.x,
+              y: drawnElement.y,
+              width: drawnElement.width,
+              height: drawnElement.height,
+              angle: drawnElement.angle,
+            }),
+          );
         }
       }
 
@@ -437,24 +480,56 @@ export function useCanvasDraw(
     };
 
     const onDoubleClick = (e: MouseEvent) => {
-      const clickedElement = findElementAtPoint(elements,e.clientX, e.clientY);
+      const clickedElement = findElementAtPoint(elements, e.clientX, e.clientY);
 
-      if (clickedElement?.type === "text"){
-        dispatch(updateElement({
-          id: clickedElement.id,
-          updates: {
-            isEditing: true
-          }
-        }));
+      if (clickedElement?.type === "text") {
+        dispatch(
+          updateElement({
+            id: clickedElement.id,
+            updates: {
+              isEditing: true,
+            },
+          }),
+        );
         dispatch(setEditingElement(clickedElement.id));
 
-        openTextEditor(clickedElement)
+        openTextEditor(clickedElement);
       }
-    }
+    };
+
     canvas.addEventListener("mousedown", onMouseDown);
     canvas.addEventListener("mousemove", onMouseMove);
     canvas.addEventListener("mouseup", onMouseUp);
     canvas.addEventListener("dblclick", onDoubleClick);
+
+    function handleSelectionClick(e: MouseEvent) {
+      if (activeTool !== "select") return;
+
+      const clickedElement = findElementAtPoint(elements, e.clientX, e.clientY);
+
+      if (clickedElement){
+        if (e.shiftKey){
+          dispatch(addToSelection(clickedElement.id));
+          const allSelected = [...selectedIds, clickedElement.id];
+          const selectedElements = elements.filter((el) => allSelected.includes(el.id));
+          const combinedBox = calculateCombinedBoundingBox(selectedElements);
+          dispatch(setBoundingBox(combinedBox))
+        } else {
+          if (!selectedIds.includes(clickedElement.id)){
+            dispatch(selectElement(clickedElement.id));
+            dispatch(setBoundingBox({
+              x: clickedElement.x,
+              y: clickedElement.y,
+              width: clickedElement.width,
+              height: clickedElement.height,
+              angle: clickedElement.angle
+            }))
+          }
+        }
+      } else {
+        dispatch(clearSelection())
+      }
+    }
 
     function openTextEditor(element: TextElement) {
       const { zoom, scrollX, scrollY } = store.getState().ui;
@@ -479,22 +554,24 @@ export function useCanvasDraw(
           );
         },
         onCommit: (text, width, height) => {
-          if (text.trim() === ""){
-            dispatch(deleteElement([element.id]))
+          if (text.trim() === "") {
+            dispatch(deleteElement([element.id]));
           } else {
-            dispatch(updateElement({
-              id: element.id,
-              updates: {
-                text,
-                originalText: text,
-                width,
-                height,
-                isEditing: false
-              }
-            }));
-          };
+            dispatch(
+              updateElement({
+                id: element.id,
+                updates: {
+                  text,
+                  originalText: text,
+                  width,
+                  height,
+                  isEditing: false,
+                },
+              }),
+            );
+          }
           dispatch(setEditingElement(null));
-          dispatch(revertToSelect())
+          dispatch(revertToSelect());
         },
       });
     }
@@ -503,7 +580,7 @@ export function useCanvasDraw(
       canvas.removeEventListener("mousedown", onMouseDown);
       canvas.removeEventListener("mousemove", onMouseMove);
       canvas.removeEventListener("mouseup", onMouseUp);
-      canvas.removeEventListener("dblclick", onDoubleClick)
+      canvas.removeEventListener("dblclick", onDoubleClick);
     };
   }, [activeTool, toolOptions, elements, dispatch, roomId, socket, canvasRef]);
 }

@@ -76,7 +76,6 @@ export function renderCanvas(
     }
     ctx.restore();
   });
-
 }
 
 function drawRectangle(
