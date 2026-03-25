@@ -1,11 +1,14 @@
 import {
   selectActiveTool,
+  selectAllElements,
+  selectElementById,
+  selectSelectedIds,
   selectToolOptions,
   selectVisibleElements,
 } from "@/store/selectors";
 import { addElement, deleteElement, updateElement } from "@/store/slices/canvasSlice";
 import { pushToHistory } from "@/store/slices/historySlice";
-import { setEditingElement } from "@/store/slices/selectionSlice";
+import { selectElement, selectElements, setBoundingBox, setEditingElement } from "@/store/slices/selectionSlice";
 import { revertToSelect } from "@/store/slices/toolSlice";
 import { store, useAppDispatch, useAppSelector } from "@/store/store";
 import { ExcalidrawElement, PencilElement, TextElement } from "@/types/canvas";
@@ -19,9 +22,10 @@ import {
   createTextElement,
 } from "@/utils/elementFactory";
 import { findElementAtPoint } from "@/utils/hitTest";
-import { renderCanvas } from "@/utils/renderCanvas";
+import { renderCanvas, renderSelectionHighlight } from "@/utils/renderCanvas";
 import { mountTextArea } from "@/utils/textAreaManager";
 import { useEffect, useRef } from "react";
+import { useSelector } from "react-redux";
 
 export function useCanvasDraw(
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
@@ -33,6 +37,9 @@ export function useCanvasDraw(
   console.log("activeTool: ", activeTool);
   const toolOptions = useAppSelector(selectToolOptions);
   const elements = useAppSelector(selectVisibleElements);
+  const selectedIds = useAppSelector(selectSelectedIds);
+  const boundingBox = useAppSelector((state) => state.selection.boundingBox);
+
   console.log(
     "textElement: ",
     elements.find((el) => el.type === "text"),
@@ -56,7 +63,7 @@ export function useCanvasDraw(
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     renderCanvas(ctx, canvas, elements);
-
+    renderSelectionHighlight(ctx, boundingBox, selectedIds)
     if (hasLoadedInitialData.current) {
       localStorage.setItem("canvas", JSON.stringify(elements))
     }
@@ -406,6 +413,25 @@ export function useCanvasDraw(
           );
         }
       }
+
+      if (activeId.current) {
+        const allElements = store.getState().canvas.elements;
+        const drawnElement = allElements.find((el) => el.id === activeId.current);
+
+        if (drawnElement) {
+          dispatch(selectElement(drawnElement.id));
+
+          dispatch(setBoundingBox({
+            x: drawnElement.x,
+            y: drawnElement.y,
+            width: drawnElement.width,
+            height: drawnElement.height,
+            angle: drawnElement.angle
+          }))
+        }
+      }
+
+      isDrawing.current = false;
       activeId.current = null;
       dispatch(revertToSelect());
     };

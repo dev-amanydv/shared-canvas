@@ -1,7 +1,9 @@
-import { ExcalidrawElement } from "@/types/canvas";
+import { BoundingBox, ExcalidrawElement } from "@/types/canvas";
 import rough from "roughjs";
 import type { Options } from "roughjs/bin/core";
 import { getStroke } from "perfect-freehand";
+import { useAppSelector } from "@/store/store";
+import { useSelector } from "react-redux";
 
 
 const FONT_FAMILY_MAP: Record<string, string> = {
@@ -19,6 +21,7 @@ export function renderCanvas(
   const rc = rough.canvas(canvas);
 
   elements.forEach((el) => {
+    
     if (el.isDeleted) return;
     ctx.save();
     ctx.globalAlpha = el.opacity / 100;
@@ -73,6 +76,7 @@ export function renderCanvas(
     }
     ctx.restore();
   });
+
 }
 
 function drawRectangle(
@@ -248,5 +252,66 @@ function drawText(
 
   lines.forEach((line, i) => {
     ctx.fillText(line, textX, el.y + i * lineHeight)
+  })
+}
+
+export function renderSelectionHighlight (
+  ctx: CanvasRenderingContext2D,
+  boundingBox: BoundingBox | null,
+  selectedIds: string[]
+) {
+  if (!boundingBox || selectedIds.length === 0) return;
+
+  ctx.save();
+  ctx.strokeStyle = '#6865D4';
+  ctx.lineWidth = 2;
+  
+
+  console.log("SELECTED ELEMENT: ", selectedIds)
+  ctx.strokeRect(boundingBox.x - 5, boundingBox.y - 5, boundingBox.width + 10, boundingBox.height + 10)
+
+  const handleSize = 8;
+  const handles = [
+    {
+      x: boundingBox.x - 5,
+      y: boundingBox.y - 5
+    },
+    {
+      x: boundingBox.x + boundingBox.width + 5,
+      y: boundingBox.y - 5
+    },
+    {
+      x: boundingBox.x + boundingBox.width + 5,
+      y: boundingBox.y + boundingBox.height + 5
+    },
+    {
+      x: boundingBox.x - 5,
+      y: boundingBox.y + boundingBox.height + 5
+    },
+    {
+      x: boundingBox.x + boundingBox.width/2,
+      y: boundingBox.y - 5
+    },
+    {
+      x: boundingBox.x + boundingBox.width/2,
+      y: boundingBox.y + boundingBox.height + 5
+    },
+    {
+      x: boundingBox.x - 5,
+      y: boundingBox.y + boundingBox.height/2
+    },
+    {
+      x: boundingBox.x + boundingBox.width + 5,
+      y: boundingBox.y + boundingBox.height/2
+    }
+  ];
+
+  ctx.fillStyle = '#fff';
+  ctx.strokeStyle = "#6865D4",
+  ctx.lineWidth = 1;
+
+  handles.forEach((handle) => {
+    ctx.fillRect(handle.x - handleSize/2, handle.y - handleSize/2, handleSize, handleSize);
+    ctx.strokeRect(handle.x - handleSize / 2,handle.y - handleSize / 2, handleSize,handleSize);
   })
 }

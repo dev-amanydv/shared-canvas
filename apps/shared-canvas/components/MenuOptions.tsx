@@ -172,8 +172,8 @@ function MenuItem({ icon, label, shortcut, purple, bold, chevron, onClick, inDev
       <span className={`w-[22px] h-[22px] flex items-center justify-center shrink-0 ${purple ? "text-[#6965db]" : "text-gray-500 dark:text-gray-400"}`}>
         {icon}
       </span>
-      <span className={`flex-1 text-left ${bold ? "font-medium" : "font-normal"}`}>
-        {label} {inDev && <span className="text-xs text-neutral-500 bg-neutral-100 px-1 rounded border border-neutral-300">soon</span>}
+      <span className={`flex-1 relative text-left ${bold ? "font-medium" : "font-normal"}`}>
+        {label} {inDev && <span className="text-[11px] ml-1 absolute -top-1 text-neutral-500 bg-neutral-100 px-1 rounded border border-neutral-300">soon</span>}
       </span>
       {shortcut && (
         <span className={`text-xs font-mono tracking-tight ${purple ? "text-[#6965db]/80" : "text-gray-400 dark:text-gray-500"}`}>
