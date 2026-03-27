@@ -76,8 +76,8 @@ export function useCanvasDraw(
   const boundingBox = useAppSelector((state) => state.selection.boundingBox);
 
   console.log(
-    "textElement: ",
-    elements.find((el) => el.type === "text"),
+    "recentElement: ",
+    elements[-1],
   );
   const isDrawing = useRef(false);
   const startX = useRef(0);
@@ -236,8 +236,17 @@ export function useCanvasDraw(
     };
 
     const onMouseMove = (e: MouseEvent) => {
+      if (activeTool === "select"){
+        console.log("MOVING ELEMENT: ", e.clientX, e.clientY)
+        dispatch(updateElement({
+          id: selectedIds[0] ,
+          updates: {
+            x: e.clientX,
+            y: e.clientY,
+          }
+        }))
+      }
       if (!isDrawing.current || !activeId.current) return;
-
       const width = e.clientX - startX.current;
       const height = e.clientY - startY.current;
 
