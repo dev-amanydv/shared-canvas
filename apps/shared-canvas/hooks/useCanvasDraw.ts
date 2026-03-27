@@ -23,7 +23,12 @@ import {
 } from "@/store/slices/selectionSlice";
 import { revertToSelect } from "@/store/slices/toolSlice";
 import { store, useAppDispatch, useAppSelector } from "@/store/store";
-import { BoundingBox, ExcalidrawElement, PencilElement, TextElement } from "@/types/canvas";
+import {
+  BoundingBox,
+  ExcalidrawElement,
+  PencilElement,
+  TextElement,
+} from "@/types/canvas";
 import {
   createCircleElement,
   createDiamondElement,
@@ -38,7 +43,9 @@ import { renderCanvas, renderSelectionHighlight } from "@/utils/renderCanvas";
 import { mountTextArea } from "@/utils/textAreaManager";
 import { useEffect, useRef } from "react";
 
-function calculateCombinedBoundingBox (elements: ExcalidrawElement[]): BoundingBox | null{
+function calculateCombinedBoundingBox(
+  elements: ExcalidrawElement[],
+): BoundingBox | null {
   if (elements.length === 0) return null;
 
   let minX = Infinity;
@@ -50,16 +57,16 @@ function calculateCombinedBoundingBox (elements: ExcalidrawElement[]): BoundingB
     minX = Math.min(Infinity, el.x);
     minY = Math.min(Infinity, el.y);
     maxX = Math.max(-Infinity, el.x + el.width);
-    maxY = Math.max(-Infinity, el.y + el.height)
-  })
+    maxY = Math.max(-Infinity, el.y + el.height);
+  });
 
   return {
     x: minX,
     y: minY,
     height: maxY - minY,
     width: maxX - minX,
-    angle: 0
-  }
+    angle: 0,
+  };
 }
 
 export function useCanvasDraw(
@@ -75,15 +82,19 @@ export function useCanvasDraw(
   const selectedIds = useAppSelector(selectSelectedIds);
   const boundingBox = useAppSelector((state) => state.selection.boundingBox);
 
-  console.log(
-    "recentElement: ",
-    elements[-1],
-  );
+  console.log("recentElement: ", elements[-1]);
   const isDrawing = useRef(false);
   const startX = useRef(0);
   const startY = useRef(0);
   const activeId = useRef<string | null>(null);
   const hasLoadedInitialData = useRef(false);
+  const isDraggingSelection = useRef(false);
+  const dragStartX = useRef(0);
+  const dragStartY = useRef(0);
+  const dragElementStartPos = useRef({
+    x: 0,
+    y: 0,
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -111,8 +122,21 @@ export function useCanvasDraw(
 
     const onMouseDown = (e: MouseEvent) => {
       if (activeTool === "hand") return;
-      if (activeTool === "select"){
+      if (activeTool === "select") {
         handleSelectionClick(e);
+        if (selectedIds.length === 0) return;
+        isDraggingSelection.current = true;
+        dragStartX.current = e.clientX;
+        dragStartY.current = e.clientY;
+
+        const el = elements.find((el) => el.id === selectedIds[0]);
+        console.log("DRAGGED ELEMENT: ", el)
+        if (el) {
+          dragElementStartPos.current = {
+            x: el.x,
+            y: el.y,
+          };
+        }
         return;
       }
       isDrawing.current = true;
@@ -236,15 +260,34 @@ export function useCanvasDraw(
     };
 
     const onMouseMove = (e: MouseEvent) => {
-      if (activeTool === "select"){
-        console.log("MOVING ELEMENT: ", e.clientX, e.clientY)
-        dispatch(updateElement({
-          id: selectedIds[0] ,
-          updates: {
-            x: e.clientX,
-            y: e.clientY,
-          }
-        }))
+      if (
+        activeTool === "select" &&
+        isDraggingSelection.current &&
+        selectedIds[0]
+      ) {
+        const dx = e.clientX - dragStartX.current;
+        const dy = e.clientY - dragStartY.current;
+
+        dispatch(
+          updateElement({
+            id: selectedIds[0],
+            updates: {
+              x: dragElementStartPos.current.x + dx,
+              y: dragElementStartPos.current.y + dy,
+            },
+          }),
+        );
+        const el = elements.find((el) => el.id === selectedIds[0]);
+        if (el) {
+dispatch(setBoundingBox({
+        x: dragElementStartPos.current.x + dx,
+        y: dragElementStartPos.current.y + dy,
+        height:el.height,
+        width: el.width,
+        angle: 0
+       }))
+        }
+        return;
       }
       if (!isDrawing.current || !activeId.current) return;
       const width = e.clientX - startX.current;
@@ -347,6 +390,7 @@ export function useCanvasDraw(
     };
 
     const onMouseUp = (e: MouseEvent) => {
+      isDraggingSelection.current = false;
       if (!isDrawing.current || !activeId.current) return;
 
       const width = e.clientX - startX.current;
@@ -516,27 +560,31 @@ export function useCanvasDraw(
 
       const clickedElement = findElementAtPoint(elements, e.clientX, e.clientY);
 
-      if (clickedElement){
-        if (e.shiftKey){
+      if (clickedElement) {
+        if (e.shiftKey) {
           dispatch(addToSelection(clickedElement.id));
           const allSelected = [...selectedIds, clickedElement.id];
-          const selectedElements = elements.filter((el) => allSelected.includes(el.id));
+          const selectedElements = elements.filter((el) =>
+            allSelected.includes(el.id),
+          );
           const combinedBox = calculateCombinedBoundingBox(selectedElements);
-          dispatch(setBoundingBox(combinedBox))
+          dispatch(setBoundingBox(combinedBox));
         } else {
-          if (!selectedIds.includes(clickedElement.id)){
+          if (!selectedIds.includes(clickedElement.id)) {
             dispatch(selectElement(clickedElement.id));
-            dispatch(setBoundingBox({
-              x: clickedElement.x,
-              y: clickedElement.y,
-              width: clickedElement.width,
-              height: clickedElement.height,
-              angle: clickedElement.angle
-            }))
+            dispatch(
+              setBoundingBox({
+                x: clickedElement.x,
+                y: clickedElement.y,
+                width: clickedElement.width,
+                height: clickedElement.height,
+                angle: clickedElement.angle,
+              }),
+            );
           }
         }
       } else {
-        dispatch(clearSelection())
+        dispatch(clearSelection());
       }
     }
 
