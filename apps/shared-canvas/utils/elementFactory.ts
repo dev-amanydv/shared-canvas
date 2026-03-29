@@ -31,6 +31,7 @@ export function createRectangleElement(
     opacity: options.opacity,
     roughness: options.roughness,
     edgeStyle: options.edgeStyle,
+    boundTextElementId: null,
     isDeleted: false,
     isLocked: false,
     seed: Math.floor(Math.random() * 100000),
@@ -60,6 +61,7 @@ export function createCircleElement(
     strokeStyle: options.strokeStyle,
     opacity: options.opacity,
     roughness: options.roughness,
+    boundTextElementId: null,
     isDeleted: false,
     isLocked: false,
     seed: Math.floor(Math.random() * 100000),
@@ -89,6 +91,7 @@ export function createDiamondElement(
     strokeStyle: options.strokeStyle,
     opacity: options.opacity,
     roughness: options.roughness,
+    boundTextElementId: null,
     isDeleted: false,
     isLocked: false,
     seed: Math.floor(Math.random() * 100000),
@@ -223,9 +226,55 @@ export function createTextElement (
     isEditing: true,
     isDeleted: false,
     isLocked: false,
+    containerId: null,
     seed: Math.floor(Math.random() * 100000),
     version: 1,
     updatedAt: Date.now(),
     createdAt: Date.now()
   }
+}
+
+export function createBoundTextElement(
+  container: { id: string; x: number; y: number; width: number; height: number; strokeColor: string },
+  options: ToolOptions
+): TextElement {
+  const fontSize = options.fontSize ?? 20;
+  const lineHeight = 1.5;
+  const textHeight = fontSize * lineHeight;
+  const cx = container.x + container.width / 2;
+  const cy = container.y + container.height / 2;
+
+  return {
+    id: nanoid(),
+    type: "text",
+    x: cx,
+    y: cy - textHeight / 2,
+    width: 10,
+    height: textHeight,
+    angle: 0,
+    strokeColor: container.strokeColor,
+    strokeWidth: 1,
+    backgroundColor: "transparent",
+    fillStyle: "none",
+    strokeStyle: "solid",
+    opacity: 100,
+    roughness: 0,
+    fontSize,
+    fontFamily: options.fontFamily ?? "hand-drawn",
+    fontWeight: "normal",
+    text: "",
+    originalText: "",
+    textAlign: "center",
+    verticalAlign: "middle",
+    lineHeight,
+    isEditing: true,
+    autoResize: true,
+    isDeleted: false,
+    isLocked: false,
+    containerId: container.id,
+    seed: Math.floor(Math.random() * 100000),
+    version: 1,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  };
 }

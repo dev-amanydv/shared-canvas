@@ -2,15 +2,14 @@ import { BoundingBox, ExcalidrawElement } from "@/types/canvas";
 import rough from "roughjs";
 import type { Options } from "roughjs/bin/core";
 import { getStroke } from "perfect-freehand";
-import { useAppSelector } from "@/store/store";
-import { useSelector } from "react-redux";
-
 
 const FONT_FAMILY_MAP: Record<string, string> = {
   "hand-drawn": "Caveat, cursive",
   "normal":     "Inter, sans-serif",
   "monospace":  "'Courier New', monospace",
 };
+
+export const ROTATION_HANDLE_OFFSET = 25;
 
 export function renderCanvas(
   ctx: CanvasRenderingContext2D,
@@ -25,6 +24,14 @@ export function renderCanvas(
     if (el.isDeleted) return;
     ctx.save();
     ctx.globalAlpha = el.opacity / 100;
+
+    if (el.angle !== 0) {
+      const cx = el.x + el.width / 2;
+      const cy = el.y + el.height / 2;
+      ctx.translate(cx, cy);
+      ctx.rotate(el.angle);
+      ctx.translate(-cx, -cy);
+    }
 
     const roughOptions: Options = {
       seed: el.seed,
@@ -232,7 +239,6 @@ function drawText(
   ctx: CanvasRenderingContext2D,
   el: Extract<ExcalidrawElement, { type: "text" }>,
 ) {
-  console.log("text: ", el)
   if (el.isDeleted) return;
   if (el.isEditing) return;
   if (!el.text.trim()) return;
@@ -240,77 +246,128 @@ function drawText(
   ctx.font = `${el.fontSize}px ${FONT_FAMILY_MAP[el.fontFamily]}`;
   ctx.fillStyle = el.strokeColor;
   ctx.textAlign = el.textAlign;
-  ctx.textBaseline= "top";
+  ctx.textBaseline = "top";
 
   let textX = el.x;
   if (el.textAlign === "center") textX = el.x + el.width / 2;
   if (el.textAlign === "right") textX = el.x + el.width;
 
   const lineHeight = el.fontSize * el.lineHeight;
-  const lines = el.text.split("\n");
+  let lines: string[] = [];
+
+  if (el.containerId) {
+    const maxWidth = el.width - 10; 
+    const rawLines = el.text.split("\n");
+    
+    rawLines.forEach((rawLine) => {
+      const words = rawLine.split(" ");
+      let currentLine = words[0] || "";
+      
+      for (let j = 1; j < words.length; j++) {
+        const word = words[j];
+        const measureWidth = ctx.measureText(currentLine + " " + word).width;
+        
+        if (measureWidth < maxWidth) {
+          currentLine += " " + word;
+        } else {
+          lines.push(currentLine);
+          currentLine = word;
+        }
+      }
+      lines.push(currentLine);
+    });
+  } else {
+    lines = el.text.split("\n");
+  }
 
   lines.forEach((line, i) => {
-    ctx.fillText(line, textX, el.y + i * lineHeight)
-  })
+    ctx.fillText(line, textX, el.y + i * lineHeight);
+  });
 }
 
 export function renderSelectionHighlight (
   ctx: CanvasRenderingContext2D,
   boundingBox: BoundingBox | null,
-  selectedIds: string[]
+  selectedIds: string[],
+  angle: number = 0
 ) {
   if (!boundingBox || selectedIds.length === 0) return;
 
+  const cx = boundingBox.x + boundingBox.width / 2;
+  const cy = boundingBox.y + boundingBox.height / 2;
+
   ctx.save();
+
+  if (angle !== 0) {
+    ctx.translate(cx, cy);
+    ctx.rotate(angle);
+    ctx.translate(-cx, -cy);
+  }
+
   ctx.strokeStyle = '#6865D4';
   ctx.lineWidth = 2;
-  
 
-  console.log("SELECTED ELEMENT: ", selectedIds)
   ctx.strokeRect(boundingBox.x - 5, boundingBox.y - 5, boundingBox.width + 10, boundingBox.height + 10)
 
   const handleSize = 8;
   const handles = [
-    {
-      x: boundingBox.x - 5,
-      y: boundingBox.y - 5
-    },
-    {
-      x: boundingBox.x + boundingBox.width + 5,
-      y: boundingBox.y - 5
-    },
-    {
-      x: boundingBox.x + boundingBox.width + 5,
-      y: boundingBox.y + boundingBox.height + 5
-    },
-    {
-      x: boundingBox.x - 5,
-      y: boundingBox.y + boundingBox.height + 5
-    },
-    {
-      x: boundingBox.x + boundingBox.width/2,
-      y: boundingBox.y - 5
-    },
-    {
-      x: boundingBox.x + boundingBox.width/2,
-      y: boundingBox.y + boundingBox.height + 5
-    },
-    {
-      x: boundingBox.x - 5,
-      y: boundingBox.y + boundingBox.height/2
-    },
-    {
-      x: boundingBox.x + boundingBox.width + 5,
-      y: boundingBox.y + boundingBox.height/2
-    }
+    { x: boundingBox.x - 5, y: boundingBox.y - 5 },
+    { x: boundingBox.x + boundingBox.width + 5, y: boundingBox.y - 5 },
+    { x: boundingBox.x + boundingBox.width + 5, y: boundingBox.y + boundingBox.height + 5 },
+    { x: boundingBox.x - 5, y: boundingBox.y + boundingBox.height + 5 },
+    { x: cx, y: boundingBox.y - 5 },
+    { x: cx, y: boundingBox.y + boundingBox.height + 5 },
+    { x: boundingBox.x - 5, y: cy },
+    { x: boundingBox.x + boundingBox.width + 5, y: cy },
   ];
 
   ctx.fillStyle = '#fff';
-  ctx.strokeStyle = "#6865D4",
+  ctx.strokeStyle = "#6865D4";
   ctx.lineWidth = 1;
 
   handles.forEach((handle) => {
     ctx.fillRect(handle.x - handleSize/2, handle.y - handleSize/2, handleSize, handleSize);
-    ctx.strokeRect(handle.x - handleSize / 2,handle.y - handleSize / 2, handleSize,handleSize);
-  })
+    ctx.strokeRect(handle.x - handleSize / 2, handle.y - handleSize / 2, handleSize, handleSize);
+  });
+
+  const rotHandleY = boundingBox.y - 5 - ROTATION_HANDLE_OFFSET;
+  const rotHandleX = cx;
+
+  ctx.beginPath();
+  ctx.strokeStyle = "#6865D4";
+  ctx.lineWidth = 1.5;
+  ctx.moveTo(rotHandleX, boundingBox.y - 5);
+  ctx.lineTo(rotHandleX, rotHandleY);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(rotHandleX, rotHandleY, 5, 0, Math.PI * 2);
+  ctx.fillStyle = "#fff";
+  ctx.fill();
+  ctx.strokeStyle = "#6865D4";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+export function getRotationHandlePosition(
+  boundingBox: BoundingBox,
+  angle: number = 0
+): { x: number; y: number } {
+  const cx = boundingBox.x + boundingBox.width / 2;
+  const cy = boundingBox.y + boundingBox.height / 2;
+  const hx = cx;
+  const hy = boundingBox.y - 5 - ROTATION_HANDLE_OFFSET;
+
+  if (angle === 0) return { x: hx, y: hy };
+
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+  const dx = hx - cx;
+  const dy = hy - cy;
+  return {
+    x: cx + dx * cos - dy * sin,
+    y: cy + dx * sin + dy * cos,
+  };
 }

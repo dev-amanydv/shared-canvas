@@ -47,7 +47,6 @@ export default function Canvas({
       const rawElements = localStorage.getItem("canvas");
       if (!rawElements) return;
       const elements = JSON.parse(rawElements)
-      console.log(elements)
       dispatch(loadElements({ elements, files: {} }));
     };
     loadExisting();

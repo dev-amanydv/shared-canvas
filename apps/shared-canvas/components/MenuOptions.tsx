@@ -208,7 +208,6 @@ export default function ExcalidrawMenu() {
     const canvas = window.document.getElementById("canvas");
     if (!canvas) return;
     canvas.style.backgroundColor = color
-    console.log("canvas: ", canvas)
   }
 
   const handleTheme = (t: ThemeType) => {

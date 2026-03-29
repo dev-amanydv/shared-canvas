@@ -53,14 +53,17 @@ export interface BaseElement {
 export interface RectangleElement extends BaseElement {
   type: "rectangle";
   edgeStyle: EdgeStyle;
+  boundTextElementId: string | null;
 }
 
 export interface CircleElement extends BaseElement {
   type: "circle";
+  boundTextElementId: string | null;
 }
 
 export interface DiamondElement extends BaseElement {
   type: "diamond";
+  boundTextElementId: string | null;
 }
 
 export interface LineElement extends BaseElement {
@@ -96,7 +99,8 @@ export interface TextElement extends BaseElement {
   lineHeight: number;
   isEditing: boolean;
   autoResize: boolean;
-  originalText: string
+  originalText: string;
+  containerId: string | null;
 }
 
 export interface ImageElement extends BaseElement {
